@@ -19,6 +19,7 @@ lib64/
 parts/
 sdist/
 var/
+logs/
 wheels/
 share/python-wheels/
 *.egg-info/
@@ -135,7 +136,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+app/.env
 .envrc
 .venv
 env/
