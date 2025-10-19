@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import analyze, healthcheck
-from app.config.config import config
+from fastapi.routing import APIRoute
+from app.routers import analyze
+from tabulate import tabulate
+import uvicorn
 
 app = FastAPI(
     title="Trust Analyzer API",
@@ -17,24 +19,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(healthcheck.router, prefix="/api/trust-analyzer")
-# app.include_router(analyze.router, prefix="/api/trust-analyzer")
+app.include_router(analyze.routerAnalyze, prefix="/api/trust-analyzer")
 
-@app.get("/")
+@app.get("/health")
 def root():
     return {"message": "Trust Analyzer API is running"}
 
 @app.on_event("startup")
 def list_routes():
-    from fastapi.routing import APIRoute
-
-    print("\n=== Available API routes ===")
+    table = []
     for route in app.routes:
         if isinstance(route, APIRoute):
-            print(f"{route.path} -> {route.methods}")
+            methods = ", ".join(route.methods)
+            table.append([route.path, methods, route.name])
+
+    print("\n=== Available API routes ===")
+    print(tabulate(table, headers=["Path", "Methods", "Endpoint Name"], tablefmt="grid"))
     print("============================\n")
 
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app.main:app", host=config.HOST, port=config.PORT, reload=False)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
