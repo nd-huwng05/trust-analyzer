@@ -7,8 +7,7 @@ from ultralytics import YOLO
 import shap
 import numpy as np
 import torch
-from transformers import AutoTokenizer, AutoProcessor, AutoModelForCausalLM, pipeline, CLIPModel, CLIPProcessor, \
-    Qwen2_5_VLForConditionalGeneration
+from transformers import AutoTokenizer, AutoProcessor, pipeline, CLIPModel, CLIPProcessor,  Qwen2VLForConditionalGeneration
 
 from backend.utils.logger import get_logger
 
@@ -31,11 +30,11 @@ class LLMModel(AIModel):
             return
         super().__init__()
 
-        self.model_name = "Qwen/Qwen2.5-VL-7B-Instruct"
+        self.model_name = "Qwen/Qwen2-VL-2B-Instruct"
         self.logger.info("Loading LLM model...")
         # self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.processor = AutoProcessor.from_pretrained(self.model_name)
-        self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(self.model_name, device_map="auto")
+        self.model = Qwen2VLForConditionalGeneration.from_pretrained(self.model_name, device_map="auto")
         get_logger().info("LLM model loaded.")
         self._initialized = True
 
