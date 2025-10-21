@@ -1,6 +1,6 @@
 from click import prompt
 
-from app.models.models import InfoProduct, Evaluate
+from app.models.modelsInfo import InfoProduct, Evaluate
 
 
 class Prompt:
@@ -15,43 +15,42 @@ class Prompt:
         self.rating = [r.rating for r in info.reviews]
         self.thank_count = [r.thank_count for r in info.reviews]
 
-    def generate_description_prompt(self) -> str:
+    def generate_description_prompt(self, predict) -> str:
         return f"""
-        Bạn là chuyên gia kiểm duyệt sản phẩm.
-        Đánh giá mức độ tin cậy của mô tả sản phẩm dưới đây từ 0 (không tin cậy) đến 100 (hoàn toàn tin cậy).
+            Bạn là chuyên gia kiểm duyệt sản phẩm.
+            Mức độ tin cậy đã được đánh giá sơ bộ: {100 - int(predict['score']*100)} trên 100,
+            Đánh giá cho rằng mô tả sản phẩm trên: {predict['label']} trong đó (LABEL_0: Fake news, LABEL_1: Real news)
+            Các từ/cụm từ quan trọng ảnh hưởng đến đánh giá: {', '.join(predict['evidence'])}
+            
+            Hãy viết một bình luận bằng tiếng việt giải thích lý do đánh giá mức độ tin cậy này,
+            dựa trên các từ/cụm từ trên chi tiết. Trả về kết quả duy nhất dưới dạng JSON hợp lệ, không thêm bất kỳ ký tự nào khác:     
+            {{
+                "score": {100 - int(predict['score']*100)},
+                "comment": str  
+            }}
+            """
 
-        Mô tả sản phẩm:
-        "{self.description}"
-        
-        Bạn sẽ phải trả về kết quả theo dạng json
-        {{
-            "score": int,       # điểm từ 0 đến 100
-            "comment": str      # giải thích lý do đánh giá như vậy
-        }}
-        """
-
-    def generate_comment_prompt(self) -> str:
+    def generate_comment_prompt(self, predict) -> str:
         if not self.review_content:
             return "Không có review nào để đánh giá."
-        all_comments = "\n".join(self.review_content)
-        all_rating = "\n".join(map(str, self.rating))
-        all_thank_count = "\n".join(map(str, self.thank_count))
+
+        all_ratings = "\n".join(map(str, self.rating))
+        all_thank_counts = "\n".join(map(str, self.thank_count))
+        fake_model_score = predict.get("score", 0)
+        fake_model_evidence = ", ".join(predict.get("evidence", []))
+
         return f"""
-            Bạn là chuyên gia đánh giá review sản phẩm.
-            Đánh giá độ tin cậy của các bình luận dưới đây từ 0 (giả/không đáng tin) đến 100 (thật/đáng tin):
-            Đây là comments
-            {all_comments}
-            Theo thứ tự là rating
-            {all_rating}
-            Tương tự là thank_count
-            {all_thank_count}
-            
-            Bạn sẽ phải trả về kết quả theo dạng json.
-            Chỉ trả về JSON hợp lệ duy nhất, không thêm bất kỳ ký tự nào khác
-            {{
-                "score": int,       # điểm từ 0 đến 100
-                "comment": str      # giải thích lý do tại sao đánh giá như vậy 
-            }}
+        Bạn là chuyên gia đánh giá phản hồi của khách hàng đã bình luận sản phẩm.
+        Mức độ tin cậy đã được đánh giá sơ bộ:: {fake_model_score}
+        Các từ/cụm từ quan trọng ảnh hưởng đến đánh giá: {fake_model_evidence}
+
+        Hãy viết một bình luận bằng tiếng việt giải thích lý do đánh giá mức độ tin cậy này,
+        dựa trên các từ/cụm từ trên chi tiết.
+        Trả về kết quả duy nhất dưới dạng JSON hợp lệ, không thêm bất kỳ ký tự nào khác:
+        {{
+            "score":  {int(predict['score'])},      # điểm tin cậy tổng thể từ 0 đến 100
+            "comment": str      # giải thích lý do tại sao lại đánh giá như vậy
+        }}
         """
 
     def generate_image_prompt(self) -> dict:
