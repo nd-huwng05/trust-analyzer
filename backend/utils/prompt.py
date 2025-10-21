@@ -1,6 +1,6 @@
 from click import prompt
 
-from app.models.modelsInfo import InfoProduct, Evaluate
+from backend.models.modelsInfo import InfoProduct, Evaluate
 
 
 class Prompt:
@@ -34,8 +34,6 @@ class Prompt:
         if not self.review_content:
             return "Không có review nào để đánh giá."
 
-        all_ratings = "\n".join(map(str, self.rating))
-        all_thank_counts = "\n".join(map(str, self.thank_count))
         fake_model_score = predict.get("score", 0)
         fake_model_evidence = ", ".join(predict.get("evidence", []))
 

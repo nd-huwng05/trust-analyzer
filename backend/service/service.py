@@ -1,7 +1,7 @@
-from app.models.modelsInfo import InfoProduct
-from app.utils.json import extract_json
-from app.utils.prompt import Prompt
-from app.models.modelsAI import LLMModel, FakeNewDetectionModel, FakeReviewModel
+from backend.models.modelsInfo import InfoProduct
+from backend.utils.json import extract_json
+from backend.utils.prompt import Prompt
+from backend.models.modelsAI import LLMModel, FakeNewDetectionModel, FakeReviewModel
 
 
 class AnalyzeService:
@@ -12,15 +12,16 @@ class AnalyzeService:
         self.fake_review_model = FakeReviewModel()
 
 
-    async def description_analyze(self, info : InfoProduct):
+    def description_analyze(self, info : InfoProduct):
         prompt = Prompt(info)
         predict = self.fake_detection_model.predict(info.description)
+        print(predict)
         prompt_description = prompt.generate_description_prompt(predict)
         result = self.llm_model.generate_sync(prompt_description)
         result = extract_json(result)
         return result
 
-    async def comment_analyze(self, info : InfoProduct):
+    def comment_analyze(self, info : InfoProduct):
         prompt = Prompt(info)
         comments = [r.content for r in info.reviews if r.content]
         predict = self.fake_review_model.predict(comments)

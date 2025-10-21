@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
-def get_logger(name: str = "app", log_dir: Path = None) -> logging.Logger:
+def get_logger(name: str = "backend", log_dir: Path = None) -> logging.Logger:
     if log_dir is None:
         log_dir = Path(__file__).resolve().parent.parent / "logs"
     log_dir.mkdir(exist_ok=True)
