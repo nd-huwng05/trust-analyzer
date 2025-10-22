@@ -28,10 +28,10 @@ class Prompt:
         3. Điểm tin cậy <60 → Không đáng tin  
         
         Viết nhận xét **ngắn gọn, rõ ràng bằng tiếng Việt**, giải thích lý do dựa trên từ/cụm từ đã cho.  
-        Trả về **JSON duy nhất**:
+        Trả về **JSON duy nhất**: Phải trả về đúng định dạng json kể cả các kí tự bên trong
         {{
             "score": {100 - int(predict['score'] * 100)}, 
-            "comment": #nhận xét chi tiết nó đi
+            "comment": #nhận xét chung không quá rõ cũng không mơ hồ
         }}
         """
 
@@ -67,25 +67,24 @@ class Prompt:
     def generate_image_prompt(self, predict) -> str:
         if isinstance(predict, dict):
             predict = [predict]
-        final_score =  int(round(np.clip(np.mean([r["score"] for r in predict]), 0, 100)))
-        all_comments = "\n".join([r["comment"] for r in predict])
+        final_score =  int(round(np.clip(np.mean([r["avg_score"] for r in predict]), 0, 100)))
+        all_avg_score ="\n".join([str(int(round(float(r["avg_score"])))) for r in predict])
         all_scores = "\n".join([str(int(round(float(r["score"])))) for r in predict])
         prompt = f"""
         Bạn là chuyên gia đánh giá hình ảnh sản phẩm TMĐT.  
-        Tổng hợp đánh giá giữa ảnh người bán và ảnh người mua:
+        Điểm độ giống nhau giữa 2 bức ảnh của người bán và người mua
+        {all_avg_score}
 
-        {all_comments}
-
-        Điểm tương đồng: {all_scores}  
+        Điểm tương đồng cao nhất: {all_scores}  
         Điểm trung bình cuối cùng: {final_score}/100
 
         Yêu cầu:
-        1. Viết nhận xét , khách quan, không khoa trương: 
+        1. Viết nhận xét , khách quan, không khoa trương: Xét theo điểm trung bình cuối cùng
            - ≥85: nhấn mạnh độ khớp cao, sản phẩm thật sát hình quảng cáo  
            - 60–84: tương đối giống, vài khác biệt nhỏ  
            - <60: khác biệt đáng kể giữa ảnh thực tế và quảng cáo  
         2. Không tạo thông tin ngoài dữ liệu  
-        3. Trả **JSON duy nhất**:
+        3. Trả **JSON duy nhất**: Phải trả về đúng định dạng json kể cả các kí tự bên trong
 
         {{
             "score": {final_score},

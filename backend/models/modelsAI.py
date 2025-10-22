@@ -8,7 +8,7 @@ import shap
 import numpy as np
 import torch
 from transformers import AutoTokenizer, AutoProcessor, pipeline, CLIPModel, CLIPProcessor, \
-    Qwen2VLForConditionalGeneration,  AutoModelForSequenceClassification
+    Qwen2VLForConditionalGeneration, AutoModelForSequenceClassification, AutoModelForCausalLM
 
 from backend.utils.logger import get_logger
 
@@ -34,7 +34,7 @@ class LLMModel(AIModel):
         self.model_name = "Qwen/Qwen2-VL-2B-Instruct"
         self.logger.info("Loading LLM model...")
         # self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.processor = AutoProcessor.from_pretrained(self.model_name)
+        self.processor = AutoProcessor.from_pretrained(self.model_name,  use_fast=True)
         self.model = Qwen2VLForConditionalGeneration.from_pretrained(self.model_name, device_map="auto")
         get_logger().info("LLM model loaded.")
         self._initialized = True
@@ -72,8 +72,9 @@ class LLMModel(AIModel):
         result = await loop.run_in_executor(None, self.generate_sync, prompt, max_new_tokens)
         return result
 
-# class LightLLMModel(AIModel):
+# class LightLLMModel:
 #     _instance = None
+#
 #     def __new__(cls, *args, **kwargs):
 #         if cls._instance is None:
 #             cls._instance = super().__new__(cls)
@@ -82,36 +83,31 @@ class LLMModel(AIModel):
 #     def __init__(self):
 #         if getattr(self, "_initialized", False):
 #             return
-#         super().__init__()
-#         self.model_name = "Qwen/Qwen2-VL-2B-Instruct-GPTQ-Int4"
-#         self.logger.info("Loading small LLM model...")
-#         # self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-#         self.processor = AutoProcessor.from_pretrained(self.model_name)
-#         self.model = Qwen2VLForConditionalGeneration.from_pretrained(self.model_name, device_map="auto")
-#         get_logger().info("LLM model loaded.")
+#         self.model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+#         self.logger = get_logger()
+#         self.logger.info("Loading small text-only LLM model...")
+#         # self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
+#         self.processor = AutoProcessor.from_pretrained(self.model_name, use_fast=True)
+#         self.model = AutoModelForCausalLM.from_pretrained(
+#             self.model_name, device_map="auto"
+#         )
+#
+#         self.logger.info("LLM model loaded.")
 #         self._initialized = True
 #
-#     def generate_sync(self, prompt: str, images: list[Image] | None = None, max_new_tokens: int = 256) -> str:
+#     def generate_sync(self, prompt: str, max_new_tokens: int = 512) -> str:
 #         inputs = self.processor(
 #             text=prompt,
-#             images=images if images else None,
 #             return_tensors="pt"
 #         ).to(self.model.device)
 #
 #         output = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
-#         result = self.processor.decode(output[0], skip_special_tokens=True)
-#         return result
+#         return self.processor.decode(output[0], skip_special_tokens=True)
 #
-#     async def generate(self, prompt: str, images: list[Image] | None = None, max_new_tokens: int = 256) -> str:
-#         loop = asyncio.get_event_loop()
-#         result = await loop.run_in_executor(None, self.generate_sync, prompt, images, max_new_tokens)
-#         return result
-#
-#     async def generate(self, prompt: str, max_new_tokens=256) -> str:
+#     async def generate(self, prompt: str, max_new_tokens: int = 512) -> str:
 #         loop = asyncio.get_event_loop()
 #         result = await loop.run_in_executor(None, self.generate_sync, prompt, max_new_tokens)
 #         return result
-
 
 class FakeNewDetectionModel(AIModel):
     _instance = None
@@ -184,89 +180,63 @@ class FakeNewDetectionModel(AIModel):
 
 class FakeReviewModel(AIModel):
     _instance = None
+
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            return cls._instance
         return cls._instance
 
-    def __init__(self):
+    def __init__(self, model_name="joeddav/xlm-roberta-large-xnli"):
         if getattr(self, "_initialized", False):
             return
-        super().__init__()
-        self.model_name = "uitnlp/visobert"
-        self.logger.info("Loading fake review detection model...")
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.clf = pipeline("text-classification", model=self.model, tokenizer=self.tokenizer)
-        self.explainer = shap.Explainer(self.predict_fn, masker=shap.maskers.Text())
-        get_logger().info("Fake review detection model loaded.")
 
+        self.model_name = model_name
+        self.logger = get_logger()
+        self.logger.info(f"Loading zero-shot fake review detection model ({self.model_name})...")
+
+        # Tạo pipeline zero-shot classification
+        self.clf = pipeline("zero-shot-classification", model=self.model_name)
         self._initialized = True
+        self.logger.info("Zero-shot fake review detection model loaded.")
 
-    def predict_fn(self, texts):
-        if isinstance(texts, np.ndarray):
-            texts = texts.tolist()
+    def predict(self, texts, candidate_labels=["spam", "normal"]):
 
-        texts = [str(t) for t in texts]
+        if isinstance(texts, str):
+            texts = [texts]
 
-        results = self.clf(texts)
-        probs = np.array([[r["score"]] for r in results])
-        return probs
+        texts = [t for t in texts if t.strip()]
+        if not texts:
+            return {"score": 0, "count_spam": 0, "count_normal": 0, "results": []}
 
-    def predict(self, texts: list[str]):
-        if not isinstance(texts, list):
-            raise ValueError("Input must be a list of strings.")
-
-        results = self.clf(texts)
         outputs = []
-        all_evidence = []
+        all_scores = []
 
         for text in texts:
-            if not text.strip():
-                continue
-
-        toxic_labels = {"spam", "toxic", "offensive", "abusive", "fake", "insult"}
-
-        for text, result in zip(texts, results):
-            label = result['label']
-            score = result['score']
-
-            shap_values = self.explainer([text])
-            top_indices = shap_values[0].values.argsort()[::-1][:5]
-            evidence = [str(shap_values[0].data[i]) for i in top_indices if shap_values[0].data[i] is not None]
-            all_evidence.extend(evidence)
-
-            if label.lower() in toxic_labels:
-                final_score = -score
-            else:
-                final_score = score
+            result = self.clf(text, candidate_labels)
+            label = result["labels"][0].lower()
+            score = result["scores"][0]
 
             outputs.append({
                 "text": text,
                 "label": label,
-                "score": final_score,
-                "evidence": evidence
+                "score": score
             })
+            all_scores.append(score if label == "spam" else 1 - score)
 
-        spam_count = sum(1 for o in outputs if o["label"].lower() in toxic_labels)
-        normal_count = sum(1 for o in outputs if o["label"].lower() not in toxic_labels)
-
-        avg_score = int(round(np.mean([o["score"] for o in outputs]) * 100))
-        if avg_score < 0:
-            avg_score = 0
-        evidence_counter = Counter(all_evidence)
-        top_evidence = [word for word, _ in evidence_counter.most_common(20)]
+        spam_count = sum(1 for o in outputs if o["label"] == "spam")
+        normal_count = len(outputs) - spam_count
+        avg_score = int(round(sum(all_scores)/len(all_scores) * 100))
 
         return {
             "score": avg_score,
-            "evidence": top_evidence,
             "count_spam": spam_count,
-            "count_normal": normal_count
+            "count_normal": normal_count,
+            "results": outputs
         }
 
 class SimilarImageModel(AIModel):
     _instance = None
+
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -277,84 +247,73 @@ class SimilarImageModel(AIModel):
             return
         super().__init__()
         self.logger.info("Loading similar image detection model...")
+
+
         self.yolo_model = YOLO("yolov8m.pt")
         self.model_name = "openai/clip-vit-base-patch32"
         self.model = CLIPModel.from_pretrained(self.model_name)
         self.processor = CLIPProcessor.from_pretrained(self.model_name)
-        self.logger.info("Similar image model loaded.")
 
+        self.logger.info("Similar image model loaded.")
         self._initialized = True
 
     def crop_object(self, img: Image):
         img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         results = self.yolo_model.predict(img_cv, verbose=False)
-        if len(results) == 0 or results[0].boxes.shape[0] == 0:
+        if not results or results[0].boxes.shape[0] == 0:
             return None
-        box = results[0].boxes.xyxy[0].cpu().numpy().astype(int)
-        x1, y1, x2, y2 = box
-        cropped = img.crop((x1, y1, x2, y2))
-        return cropped
+        x1, y1, x2, y2 = results[0].boxes.xyxy[0].cpu().numpy().astype(int)
+        return img.crop((x1, y1, x2, y2))
 
     def get_embedding(self, img: Image):
         inputs = self.processor(images=img, return_tensors="pt").to(self.model.device)
         with torch.no_grad():
             emb = self.model.get_image_features(**inputs)
         emb = emb / emb.norm(dim=-1, keepdim=True)
-        return emb.cpu().numpy()
+        return emb.cpu().numpy().reshape(-1)
 
     def predict_similarity(self, imgs: list[Image]):
         if len(imgs) != 2:
-            raise ValueError("Input images must have 2 images.")
+            raise ValueError("Input must contain exactly 2 images.")
         emb1 = self.get_embedding(imgs[0])
         emb2 = self.get_embedding(imgs[1])
         sim = float(np.dot(emb1, emb2.T))
         return np.array([[sim]])
 
-    def compare(self, seller_imgs: list[Image], buyer_imgs: list[Image], llm:LLMModel):
-        seller_crops, seller_embs = [],[]
+    def compare(self, seller_imgs: list[Image], buyer_imgs: list[Image]):
+        seller_crops, seller_embs = [], []
+
         for img in seller_imgs:
             crop = self.crop_object(img)
             if crop is None:
                 continue
-            emb = self.get_embedding(img)
-            if hasattr(emb, "detach"):
-                emb = emb.detach().cpu().numpy()
-            emb = emb.reshape(-1)
+            emb = self.get_embedding(crop)
             seller_crops.append(crop)
             seller_embs.append(emb)
 
-        if len(seller_embs) == 0:
-            return {
-                "score": 0,
-                "comment": "Không phát hiện đối tượng sản phẩm trong ảnh"
-            }
+        if not seller_embs:
+            return {"score": 0,"avg_score": 0, "comment": "Không phát hiện đối tượng sản phẩm trong ảnh"}
 
-        seller_embs = np.array(seller_embs).reshape(len(seller_embs), -1)
+        seller_embs = np.stack(seller_embs)
 
         results = []
         for buyer_img in buyer_imgs:
             buyer_crop = self.crop_object(buyer_img)
             if buyer_crop is None:
                 continue
-            buyer_emb = self.get_embedding(buyer_img)
+            buyer_emb = self.get_embedding(buyer_crop)
 
             sims = cosine_similarity(seller_embs, buyer_emb.reshape(1, -1)).squeeze()
             sims = ((sims + 1) / 2 * 100).round().astype(int)
 
             best_idx = int(sims.argmax())
             best_score = int(sims[best_idx])
-            best_seller_img = seller_crops[best_idx]
             avg_score = float(sims.mean())
 
-            prompt = (
-                f"Hai bức ảnh này có độ tương đồng {best_score}%. "
-                f"Độ tương đồng trung bình giữa hai tập ảnh là {avg_score:.1f}%. "
-                f"Hãy từ đó đưa ra nhận xét chi tiết và tổng quan cho việc đánh giá."
-            )
-            explanation = llm.generate_sync(prompt, [best_seller_img, buyer_crop])
             results.append({
                 "score": best_score,
-                "comment": explanation
+                "avg_score": avg_score
             })
 
         return results
+

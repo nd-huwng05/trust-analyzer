@@ -17,12 +17,11 @@ class AnalyzeService:
         promt = Prompt(info)
         buyer_image = load_images_from_urls(info.image_buyer)
         product_image = load_images_from_urls(info.image_product)
-        predict = self.similarity_model.compare(buyer_image, product_image, self.llm_model)
+        predict = self.similarity_model.compare(buyer_image, product_image)
         promt_image = promt.generate_image_prompt(predict)
         result = self.llm_model.generate_sync(promt_image)
         result = extract_json(result)
         return result
-
 
     def description_analyze(self, info : InfoProduct):
         prompt = Prompt(info)
