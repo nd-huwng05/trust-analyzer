@@ -1,5 +1,4 @@
-from click import prompt
-
+import numpy as np
 from backend.models.modelsInfo import InfoProduct, Evaluate
 
 
@@ -17,82 +16,102 @@ class Prompt:
 
     def generate_description_prompt(self, predict) -> str:
         return f"""
-            Bạn là chuyên gia kiểm duyệt sản phẩm.
-            Mức độ tin cậy đã được đánh giá sơ bộ: {100 - int(predict['score']*100)} trên 100,
-            Đánh giá cho rằng mô tả sản phẩm trên: {predict['label']} trong đó (LABEL_0: Fake news, LABEL_1: Real news)
-            Các từ/cụm từ quan trọng ảnh hưởng đến đánh giá: {', '.join(predict['evidence'])}
-            
-            Hãy viết một bình luận bằng tiếng việt giải thích lý do đánh giá mức độ tin cậy này,
-            dựa trên các từ/cụm từ trên chi tiết. Trả về kết quả duy nhất dưới dạng JSON hợp lệ, không thêm bất kỳ ký tự nào khác:     
-            {{
-                "score": {100 - int(predict['score']*100)},
-                "comment": str  
-            }}
-            """
+        Bạn là chuyên gia kiểm duyệt nội dung sản phẩm TMĐT.  
+        Dựa trên kết quả mô hình AI:
+        
+        - Điểm tin cậy: {100 - int(predict['score'] * 100)}/100  
+        - Từ/cụm từ quan trọng: {', '.join(predict['evidence'])}  
+        
+        Hướng dẫn:  
+        1. Điểm tin cậy ≥85 → Rất đáng tin  
+        2.Điểm tin cậy 60–84 → Tương đối đáng tin  
+        3. Điểm tin cậy <60 → Không đáng tin  
+        
+        Viết nhận xét **ngắn gọn, rõ ràng bằng tiếng Việt**, giải thích lý do dựa trên từ/cụm từ đã cho.  
+        Trả về **JSON duy nhất**:
+        {{
+            "score": {100 - int(predict['score'] * 100)}, 
+            "comment": #nhận xét chi tiết nó đi
+        }}
+        """
 
     def generate_comment_prompt(self, predict) -> str:
         if not self.review_content:
             return "Không có review nào để đánh giá."
 
-        fake_model_score = predict.get("score", 0)
+        fake_model_score = int(predict.get("score", 0))
         fake_model_evidence = ", ".join(predict.get("evidence", []))
 
         return f"""
-        Bạn là chuyên gia đánh giá phản hồi của khách hàng đã bình luận sản phẩm.
-        Mức độ tin cậy đã được đánh giá sơ bộ:: {fake_model_score}
-        Các từ/cụm từ quan trọng ảnh hưởng đến đánh giá: {fake_model_evidence}
-
-        Hãy viết một bình luận bằng tiếng việt giải thích lý do đánh giá mức độ tin cậy này,
-        dựa trên các từ/cụm từ trên chi tiết.
-        Trả về kết quả duy nhất dưới dạng JSON hợp lệ, không thêm bất kỳ ký tự nào khác:
+        Bạn là chuyên gia đánh giá độ tin cậy của **phản hồi khách hàng**.  
+        Kết quả AI:
+        
+        - Điểm tin cậy: {fake_model_score}/100  
+        - Từ/cụm từ quan trọng: {fake_model_evidence}  
+        - Số spam: {predict['count_spam']}  
+        - Số bình luận bình thường: {predict['count_normal']}  
+        
+        Hướng dẫn:  
+        1. ≥85 → Rất đáng tin, trải nghiệm thật, không phóng đại  
+        2. 60–84 → Tương đối đáng tin, có thể chủ quan hoặc chưa kiểm chứng  
+        3. <60 → Không đáng tin, có dấu hiệu spam hoặc phóng đại  
+        
+        Viết **nhận xét ngắn gọn, rõ ràng bằng tiếng Việt**, giải thích dựa trên từ/cụm từ đã cho.  
+        Trả về **JSON duy nhất**:
         {{
-            "score":  {int(predict['score'])},      # điểm tin cậy tổng thể từ 0 đến 100
-            "comment": str      # giải thích lý do tại sao lại đánh giá như vậy
+            "score": {fake_model_score},    # điểm tin cậy từ 0 đến 100
+            "comment": #nhận xét chi tiết
         }}
         """
 
-    def generate_image_prompt(self) -> dict:
-        prompt = """
-            Bạn là chuyên gia đánh giá sản phẩm.
-            Hãy so sánh hai hình ảnh sau: một từ người bán và một từ người dùng.
-            Đánh giá mức độ giống nhau của hai hình này, từ 0 (khác hoàn toàn, có thể là giả)
-            đến 100 (giống nhau hoàn toàn, đáng tin cậy).
-            Trả về kết quả dưới dạng JSON:
-            {
-                "score": int,       # điểm từ 0 đến 100
-                "comment": str      # giải thích lý do đánh giá
-            }
-            """
+    def generate_image_prompt(self, predict) -> str:
+        if isinstance(predict, dict):
+            predict = [predict]
+        final_score =  int(round(np.clip(np.mean([r["score"] for r in predict]), 0, 100)))
+        all_comments = "\n".join([r["comment"] for r in predict])
+        all_scores = "\n".join([str(int(round(float(r["score"])))) for r in predict])
+        prompt = f"""
+        Bạn là chuyên gia đánh giá hình ảnh sản phẩm TMĐT.  
+        Tổng hợp đánh giá giữa ảnh người bán và ảnh người mua:
 
-        return {
-            "prompt": prompt,
-            "image_paths": [self.image_buyer_url, self.image_product_url]
-        }
+        {all_comments}
+
+        Điểm tương đồng: {all_scores}  
+        Điểm trung bình cuối cùng: {final_score}/100
+
+        Yêu cầu:
+        1. Viết nhận xét , khách quan, không khoa trương: 
+           - ≥85: nhấn mạnh độ khớp cao, sản phẩm thật sát hình quảng cáo  
+           - 60–84: tương đối giống, vài khác biệt nhỏ  
+           - <60: khác biệt đáng kể giữa ảnh thực tế và quảng cáo  
+        2. Không tạo thông tin ngoài dữ liệu  
+        3. Trả **JSON duy nhất**:
+
+        {{
+            "score": {final_score},
+            "comment": #nhận xét tổng quan, không xuống dòng
+        }}
+        """
+        return prompt
+
     @staticmethod
     def generate_full_prompt(image:Evaluate, comment:Evaluate, text:Evaluate) -> str:
         prompt = f"""
-            Bạn là chuyên gia kiểm định chất lượng sản phẩm trên sàn thương mại điện tử.
-            Dưới đây là kết quả phân tích từng phần về độ tin cậy của một sản phẩm:
-            Về kết quả hình ảnh người bán và người mua: 
-                Điểm tin cậy(0-100): {image.score}
-                Mô tả: {image.comment}
-            Về mô tả sản phấm: 
-                Điểm tin cậy(0-100): {text.score}
-                Mô tả: {text.comment}
-            Về kết quả phân tích bình luận:
-                Điểm tin cậy(0-100): {comment.score}
-                Mô tả: {comment.comment}
-                
-            Dựa trên toàn bộ thông tin trên, hãy **đưa ra đánh giá tổng thể cuối cùng**
-            về độ tin cậy của sản phẩm (hàng thật hay hàng giả, mô tả trung thực hay không).
+        Bạn là chuyên gia kiểm định chất lượng sản phẩm TMĐT.  
+        Kết quả phân tích chi tiết:
 
-            Trả về kết quả **dưới dạng JSON** như sau:
-    
-            {{
-                "score": int,  # điểm tổng thể từ 0 (giả mạo) đến 100 (đáng tin cậy)
-                "comment": str        #  lý do tại sao sản phẩm đạt điểm này
-            }}
-            """
+        - Hình ảnh (người bán vs người mua): {image.score}/100, {image.comment}  
+        - Mô tả sản phẩm: {text.score}/100, {text.comment}  
+        - Phân tích bình luận: {comment.score}/100, {comment.comment}  
 
+        Dựa trên các thông tin trên, đưa **đánh giá tổng thể** về độ tin cậy của sản phẩm.  
+
+        Trả về **JSON duy nhất**:
+
+        {{
+            "score": int,    # 0–100
+            "comment": str   # lý do tại sao sản phẩm đạt điểm này
+        }}
+        """
         return prompt
 
