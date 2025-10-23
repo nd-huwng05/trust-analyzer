@@ -95,6 +95,44 @@ trust-analyzer/
 * Supports integration with backend API.
 * UI/UX design to be implemented.
 
+### Feature
+-  **Product Data Crawling:**  
+  Automatically extracts product information from e-commerce sites (currently supports **Tiki.vn**) using the product link entered by the user.
+-  **Seller Reliability Analysis:**  
+ Evaluates sellers by analyzing product descriptions, user reviews, and product images to assess trustworthiness and detect potential spam.
+- **Behavior Scoring:**  
+  Generates a seller behavior score using AI/algorithmic analysis to help users quickly assess the reliability of a seller.
+- **Interactive Visualization:**  
+  Displays data and analysis results through intuitive charts and sidebars, including:  
+  - Trust score breakdown  
+  - Spam rate vs normal comments  
+  - Emotion distribution in customer feedback
+- **User-Friendly Interface:**  
+  Built with **React.js** and **TailwindCSS** for a responsive and smooth user experience.
+- **Fast and Efficient:**  
+  Powered by **Vite** for rapid build and optimized performance, ensuring data scraping and analysis are done quickly.
+
+### Structure
+```
+frontend/my-project
+├── .vite # Build configuration for Vite  
+├── nodes_module # Dependencies installed from npm  
+├── public # Scripts injected into e-commerce pages  
+├── src # Core logic for the sidebar UI and API calls  
+├── .env # Environment variables (e.g., API_URL..)
+├── package.json  # Project metadata, dependencies, and scripts
+├── vite.config.js  # Vite configuration (aliases, server, build settings)
+```
+
+### How to Use Website
+1. Enter a **product link** into the input field (currently supports products from **Tiki.vn**).  
+2. Click **"Fetch Data"** to scrape product information from the website.  
+3. After the data is loaded, click **"Check Reliability"** to analyze and evaluate the seller’s trust score.
+   - **Overall score** of the product
+   - **Analysis of description, images, and reviews**
+   - **Store information**
+   - **Featured reviews**
+
 ## 🔹 Extension
 
 The extension will allow users to:

@@ -27,7 +27,7 @@ export const DetectPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 2. Hàm mở Modal
-  const handleOpenModal = () => setIsModalOpen(true);
+  // const handleOpenModal = () => setIsModalOpen(true);
 
   // Hàm đóng Modal
   const handleCloseModal = () => setIsModalOpen(false);
@@ -100,7 +100,7 @@ export const DetectPage = () => {
 
     try {
       // Encode URL để đảm bảo các ký tự đặc biệt được xử lý đúng
-      const response = await fetch(`http://127.0.0.1:8000/api/trust-analyzer/analyze/description`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/trust-analyzer/analyze/description`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -132,7 +132,7 @@ export const DetectPage = () => {
     }
     try {
       // Encode URL để đảm bảo các ký tự đặc biệt được xử lý đúng
-      const response = await fetch(`http://127.0.0.1:8000/api/trust-analyzer/analyze/image`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/trust-analyzer/analyze/image`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -163,7 +163,7 @@ export const DetectPage = () => {
 
     try {
       // Encode URL để đảm bảo các ký tự đặc biệt được xử lý đúng
-      const response = await fetch(`http://127.0.0.1:8000/api/trust-analyzer/analyze/comment`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/trust-analyzer/analyze/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -190,7 +190,7 @@ export const DetectPage = () => {
   const getFull = async () => {
     try {
       // Encode URL để đảm bảo các ký tự đặc biệt được xử lý đúng
-      const response = await fetch(`http://127.0.0.1:8000/api/trust-analyzer/analyze/full`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/trust-analyzer/analyze/full`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
