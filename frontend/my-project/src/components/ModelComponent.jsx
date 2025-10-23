@@ -76,7 +76,7 @@ const ModelComponent = ({ onClose, description, image, comment }) => {
           <div className="bg-yellow-50 p-4 rounded-xl shadow-sm">
             <p className="font-semibold text-gray-600">Đánh giá</p>
             <p className="text-2xl font-bold text-yellow-600">
-              {((comment?.comment?.score ?? 0).toFixed(2))}%
+              {((comment?.review?.score ?? 0).toFixed(2))}%
             </p>
           </div>
         </div>
@@ -107,19 +107,19 @@ const ModelComponent = ({ onClose, description, image, comment }) => {
               <p>
                 <span className="font-medium text-gray-700">Tỷ lệ bình thường:</span>{' '}
                 <span className="text-blue-600 font-semibold">
-                  {comment?.comment?.non_spam_ratio ?? 0}%
+                  {comment?.review?.non_spam_ratio ?? 0}%
                 </span>
               </p>
               <p className="mt-2">
                 <span className="font-medium text-gray-700">Số bình luận bình thường:</span>{' '}
                 <span className="text-green-600 font-semibold">
-                  {comment?.comment?.count_normal ?? 0}
+                  {comment?.review?.count_normal ?? 0}
                 </span>
               </p>
               <p className="mt-2">
                 <span className="font-medium text-gray-700">Số bình luận spam:</span>{' '}
                 <span className="text-red-500 font-semibold">
-                  {comment?.comment?.count_spam ?? 0}
+                  {comment?.review?.count_spam ?? 0}
                 </span>
               </p>
 
@@ -133,9 +133,9 @@ const ModelComponent = ({ onClose, description, image, comment }) => {
               <p className="font-medium text-gray-700 mb-2">📊 Tỷ lệ cảm xúc:</p>
               <canvas ref={chartRef} className="!w-[300px] !h-[300px]" />
               <ul className="mt-3 text-sm space-y-1">
-                <li>😊 <span className="text-green-600 font-semibold">Tích cực:</span> {POS}%</li>
-                <li>☹️ <span className="text-red-500 font-semibold">Tiêu cực:</span> {NEG}%</li>
-                <li>😐 <span className="text-gray-600 font-semibold">Trung lập:</span> {NEU}%</li>
+                <li>😊 <span className="text-green-600 font-semibold">Tích cực:</span> {comment?.review?.summary.sentiment_ratio.POS}%</li>
+                <li>☹️ <span className="text-red-500 font-semibold">Tiêu cực:</span> {comment?.review?.summary.sentiment_ratio.NEG}%</li>
+                <li>😐 <span className="text-gray-600 font-semibold">Trung lập:</span> {comment?.review?.summary.sentiment_ratio.NEU}%</li>
               </ul>
             </div>
           </div>

@@ -17,7 +17,7 @@ export const DetectPage = () => {
   const [data, setData] = useState(null);
   const [flagReviewAI, setFlagReviewAI] = useState(false)
   const [flagStartAnalyse, setFlagAnalyse] = useState(false)
-    const [flagFinal, setFlagFinal] = useState(false)
+  const [flagFinal, setFlagFinal] = useState(false)
   // load bên trái
   const [isLoading, setIsLoading] = useState(false); // State mới cho loading
   const [message, setMessage] = useState("Sẵn sàng nhập URL..."); // Đã chuyển message thành useState
@@ -27,7 +27,7 @@ export const DetectPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 2. Hàm mở Modal
-  // const handleOpenModal = () => setIsModalOpen(true);
+   const handleOpenModal = () => setIsModalOpen(true);
 
   // Hàm đóng Modal
   const handleCloseModal = () => setIsModalOpen(false);
@@ -409,11 +409,11 @@ export const DetectPage = () => {
               </li>
 
             
-              {/* {flagFinal === false && (
+              {flagFinal  && (
                   <div className="absolute right-2 bottom-1 text-blue-500 cursor-pointer" onClick={handleOpenModal}>
                 Xem chi tiết
               </div>
-                )} */}
+                )}
 
             </ul>
           )}
