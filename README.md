@@ -97,8 +97,61 @@ trust-analyzer/
 
 ## 🔹 Extension
 
-* Placeholder folder for future browser extension development.
-* Will allow trust analysis directly on e-commerce platforms.
+The extension will allow users to:
+
+- Analyze product trustworthiness directly on the product page.
+- View AI-generated scores for product description, images, and reviews.
+- Get a summary of the store's credibility.
+- Make more informed purchasing decisions without leaving the e-commerce site.
+
+### Features
+
+- **Sidebar UI**: Displays the trust analysis without redirecting the user.
+- **Real-time AI Scoring**: Pulls data from the backend API and shows scores.
+- **Review Highlights**: Show insights from customer reviews.
+- **Image Analysis**: Evaluate product and customer-submitted images.
+- **Store Info**: Provide key information about the seller or store.
+
+### Structure
+```
+extension-gppm/
+├── manifest.json # Browser extension manifest
+├── background.js # Background scripts
+├── content.js # Scripts injected into e-commerce pages
+├── sidebar.js # Logic for sidebar UI and API calls
+├── sidebar.html # Sidebar HTML layout
+└── sidebar.css # Sidebar styling
+```
+### How to Use Extension-GPPM
+
+#### 1. Install the Extension (Developer Mode)
+
+1. Open Chrome (or any Chromium-based browser) and go to:  
+   `chrome://extensions/`
+2. Enable **Developer mode** (top-right corner).
+3. Click **Load unpacked**.
+4. Select the `extension-gppm/` folder on your computer.
+5. The extension will be added to your browser.
+
+#### 2. Using on E-commerce Pages
+
+1. Go to a product page on **Tiki**.
+2. Click the extension icon in the browser toolbar.
+3. A sidebar will appear on the right side of the page.
+4. Click **Analyze Product** to send data to the Trust Analyzer backend.
+5. The results will display:
+   - **Overall score** of the product
+   - **Analysis of description, images, and reviews**
+   - **Store information**
+   - **Featured reviews**
+
+#### 3. Notes
+
+- The extension currently requires the **backend API** to be running, which includes:
+  - `runAPI.py`
+  - `backend/service/crawller.py`
+- If the backend is not running, the sidebar cannot perform product analysis.
+- Currently, the extension only supports **Tiki**; other platforms may be added in the future.
 
 ## 🔹 Technologies Used
 
@@ -117,4 +170,9 @@ trust-analyzer/
 
 ## 🔹 License
 
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+
+

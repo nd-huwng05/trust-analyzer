@@ -350,6 +350,7 @@ def extract_core_metrics(result_data: dict) -> dict:
             if key == 'price':
                 # Chuyển sang số nguyên (loại bỏ ký tự không phải số)
                 metrics['price'] = int(''.join(filter(str.isdigit, value_str)))
+
             elif key == 'rating_average':
                 # Chuyển sang số thực
                 metrics['rating_average'] = float(value_str)

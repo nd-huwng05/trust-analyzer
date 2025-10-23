@@ -42,7 +42,7 @@ class LLMModel(AIModel):
         get_logger().info("LLM model loaded.")
         self._initialized = True
 
-    def generate_sync(self, prompt_description, images: list[Image] | None = None,max_new_tokens=256):
+    def  generate_sync(self, prompt_description, images: list[Image] | None = None,max_new_tokens=256):
         user_content = []
         if images:
             for img in images:
@@ -347,4 +347,3 @@ class SimilarImageModel(AIModel):
             "score": avg_score_total,
             "best_matches": best_matches
         }
-

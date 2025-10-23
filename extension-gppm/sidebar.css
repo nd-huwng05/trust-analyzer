@@ -1,3 +1,220 @@
+<<<<<<< HEAD
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f9f9f9;
+  color: #333;
+  overflow-y: auto;
+}
+
+/* Sidebar Container */
+#sidebar-container {
+  padding: 0 10px;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+/* Headings */
+h2, h3, h4 {
+  margin: 10px 0;
+  color: #222;
+}
+
+/* Product Section */
+.product-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 12px;
+  background: #daefff;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+.product-section img {
+  border-radius: 10px;
+  max-width: 100px;
+  margin: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.product-section img:hover {
+  transform: scale(1.05);
+}
+
+/* Loading */
+#loading {
+  font-size: 16px;
+  text-align: center;
+  margin-top: 50px;
+  color: #555;
+  display: none;
+}
+
+/* Spinner */
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Custom Scrollbar */
+#sidebar-container::-webkit-scrollbar {
+  width: 8px;
+}
+#sidebar-container::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+#sidebar-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+#sidebar-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* AI Score Section */
+#ai-score-section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+  margin-top: 15px;
+  animation: fadeIn 0.4s ease-in;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#ai-score-section h3 {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+#ai-score-section p {
+  line-height: 1.5;
+  margin: 5px 0;
+}
+
+/* Analysis Sections */
+.analysis-section {
+  background: #f8fbff;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+}
+.analysis-section:hover {
+  background: #f9fafc;
+  border-radius: 12px;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.05);
+}
+
+.analysis-section h4 {
+  font-size: 16px;
+  color: #34495e;
+  margin-bottom: 6px;
+}
+
+.analysis-section p {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.analysis-score {
+  font-weight: bold;
+  font-size: 16px;
+  color: #1626cf;
+  margin-bottom: 8px;
+}
+
+/* Analyze Button */
+#analyze-btn {
+  width: 100%;
+  margin: 6px 0;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1626cf, #0d5188);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+#analyze-btn:hover {
+  background: linear-gradient(135deg, #0d5188, #113e98);
+  transform: translateY(-2px);
+}
+
+#analyze-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* AI summary small box */
+.ai-summary {
+  background: #eef5ff;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.ai-details h3 {
+  margin-top: 10px;
+  color: #333;
+}
+
+.ai-details p {
+  margin-left: 8px;
+  margin-bottom: 5px;
+}
+
+/* Total Section Gradient */
+#total-section {
+  background: linear-gradient(135deg, #0d5188, #1626cf);
+  color: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#total-section h2 {
+  margin: 0 0 10px 0;
+  font-size: 22px;
+}
+
+#total-section p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e0e0e0;
+}
+=======
 
     * { box-sizing: border-box; }
     body {
@@ -120,3 +337,4 @@
     }
 
     
+>>>>>>> 377cab51c87c952482447d39baa4b8ddd0369535
