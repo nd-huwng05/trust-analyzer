@@ -14,31 +14,17 @@ class AnalyzeService:
         self.similarity_model = SimilarImageModel()
 
     def image_analyze(self, info : InfoProduct):
-        promt = Prompt(info)
-        buyer_image = load_images_from_urls(info.image_buyer)
-        product_image = load_images_from_urls(info.image_product)
-        predict = self.similarity_model.compare(buyer_image, product_image)
-        promt_image = promt.generate_image_prompt(predict)
-        result = self.llm_model.generate_sync(promt_image)
-        result = extract_json(result)
-        return result
+        predict = self.similarity_model.compare(info.image_buyer, info.image_product)
+        return predict
 
     def description_analyze(self, info : InfoProduct):
-        prompt = Prompt(info)
         predict = self.fake_detection_model.predict(info.description)
-        prompt_description = prompt.generate_description_prompt(predict)
-        result = self.llm_model.generate_sync(prompt_description)
-        result = extract_json(result)
-        return result
+        return predict
 
-    def comment_analyze(self, info : InfoProduct):
-        prompt = Prompt(info)
+    async def comment_analyze(self, info : InfoProduct):
         comments = [r.content for r in info.reviews if r.content]
-        predict = self.fake_review_model.predict(comments)
-        prompt_comment = prompt.generate_comment_prompt(predict)
-        result = self.llm_model.generate_sync(prompt_comment)
-        result = extract_json(result)
-        return result
+        predict = await self.fake_review_model.predict(comments)
+        return predict
 
     def full_analyze(self, text, image, comment):
         prompt_full = Prompt.generate_full_prompt(image, comment, text)

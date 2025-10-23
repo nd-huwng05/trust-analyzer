@@ -41,9 +41,9 @@ async def analyze_description(request: Request):
 async def analyze_comment(request: Request):
     data = await request.json()
     product_json = InfoProduct(**data)
-    result_comment = serviceAnalyze.comment_analyze(product_json)
+    response = await serviceAnalyze.comment_analyze(product_json)
     response = {
-        "review": result_comment,
+        "review": response,
     }
     return JSONResponse(response)
 
