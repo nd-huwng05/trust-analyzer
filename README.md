@@ -1,224 +1,211 @@
-# Trust Analyzer
+# 🧠 Trust Analyzer
 
-**Trust Analyzer** is an AI-powered tool for **analyzing and evaluating the trustworthiness of products, sellers, or stores** based on descriptions, images, and reviews. The system combines **deep learning models (YOLOv8) with Python APIs and Hugging Face transformers models** to provide quick and insightful trust evaluations.
+**Trust Analyzer** is a comprehensive **AI-powered platform** for analyzing and verifying the **trustworthiness of online products, sellers, and stores**. It leverages **multimodal AI** (text, image, and reviews) with models like **YOLOv8**, **Qwen2-VL**, and **DeBERTa** to deliver accurate, real-time trust evaluations.
 
-It leverages several Hugging Face pretrained models for natural language processing, including:
+---
 
-* `MoritzLaurer/deberta-v3-base-zeroshot-v1` for product anomaly detection.
-* `visolex/visobert-spam-classification` for fake review detection.
-* `5CD-AI/Vietnamese-Sentiment-visobert` for sentiment analysis.
-* `Qwen/Qwen2-VL-2B-Instruct` for multimodal language-image reasoning.
+## 📘 Overview
 
-## 🔹 Features
+This project includes three integrated components:
 
-* Analyze **product descriptions** to detect authenticity using zero-shot classification.
-* Analyze **product images** using YOLOv8 and CLIP embeddings for similarity checks.
-* Detect **fake or spam reviews** using Hugging Face transformer models.
-* Analyze **sentiment of reviews** for trust evaluation.
-* Combine multiple modalities (text + images) for a comprehensive **trust score**.
-* Easy-to-integrate API for other systems.
+1️⃣ **Backend (AI + API Service)** — Core AI logic and FastAPI endpoints.
+2️⃣ **Frontend (Web Application)** — Interactive UI for visualization and user interaction.
+3️⃣ **Browser Extension (GPPM)** — On-page product analysis directly within e-commerce sites.
 
-## 🔹 Installation
+---
 
-1. **Clone the repository**
+## 🌟 Core Features
+
+| Category                 | Description                                                     | Model                                      |
+| ------------------------ | --------------------------------------------------------------- | ------------------------------------------ |
+| 🧾 Description Analysis  | Detects misleading or fake product descriptions                 | `MoritzLaurer/deberta-v3-base-zeroshot-v1` |
+| 🚫 Fake Review Detection | Identifies spam and deceptive customer reviews                  | `visolex/visobert-spam-classification`     |
+| 😊 Sentiment Analysis    | Evaluates sentiment in user reviews                             | `5CD-AI/Vietnamese-Sentiment-visobert`     |
+| 🖼️ Image Comparison     | Detects visual inconsistencies between product and buyer images | `YOLOv8m.pt` + CLIP                        |
+| 🧠 Multimodal Reasoning  | Combines text + image + reviews for overall scoring             | `Qwen/Qwen2-VL-2B-Instruct`                |
+
+---
+
+## 🧩 Backend (AI + API Service)
+
+### 🔹 Installation
 
 ```bash
 git clone https://github.com/nd-huwng05/trust-analyzer.git
 cd trust-analyzer
-```
 
-2. **Create a virtual environment and install dependencies**
-
-```bash
 python -m venv venv
-source venv/bin/activate  # Linux/macOS
-venv\Scripts\activate     # Windows
+source venv/bin/activate   # macOS/Linux
+venv\Scripts\activate      # Windows
+
 pip install -r requirements.txt
 ```
 
-3. **Prepare YOLOv8 and Hugging Face models**
+**Models:**
 
-* The YOLOv8 model `yolov8m.pt` is included.
-* Hugging Face models will be automatically downloaded on first use.
+* `yolov8m.pt` included by default.
+* Hugging Face models auto-download on first use.
 
-## 🔹 Running the API
+> 💡 For offline setups, manually download weights and update the config paths.
+
+---
+
+### 🚀 Running the API
 
 ```bash
 python runAPI.py
 ```
 
-* API runs at `http://127.0.0.1:8000`
-* Endpoints for image and description analysis: `/api/trust-analyzer/analyze/image` or `/api/trust-analyzer/analyze/description`
-* Sample JSON input (for demonstration purposes):
+Access API at **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+
+**Available Endpoints:**
+
+| Endpoint                                       | Description                               |
+| ---------------------------------------------- | ----------------------------------------- |
+| `POST /api/trust-analyzer/analyze/description` | Evaluate product description authenticity |
+| `POST /api/trust-analyzer/analyze/image`       | Compare buyer vs product images           |
+| `POST /api/trust-analyzer/analyze/review`      | Detect fake reviews                       |
+| `POST /api/trust-analyzer/analyze/all`         | Perform full multimodal analysis          |
+
+---
+### 🧠 Example Request & Response
+
+**Request:**
 
 ```json
 {
-    "description": "<sample product description here>",
-    "image_buyer": ["<buyer image URLs>"],
-    "image_product": ["<product image URLs>"],
-    "name": "<product name>",
-    "properties": ["<product properties>"] ,
-    "reviews": ["<list of reviews>"] ,
-    "store_data": {"<store info>": "<value>"}
+  "description": "High-quality leather wallet with RFID protection.",
+  "image_buyer": ["<buyer_image_url>"],
+  "image_product": ["<product_image_url>"],
+  "name": "Leather Wallet",
+  "properties": ["RFID", "Genuine Leather"],
+  "reviews": ["Great wallet!", "Fake product, don't buy!"],
+  "store_data": {"seller": "Tiki Store"}
 }
 ```
 
-* Sample JSON response:
+**Response:**
 
 ```json
 {
-    "description": {"label": "mô tả sản phẩm hợp lệ", "score": 0.9478},
-    "review": {"trust_score": 69, "non_spam_ratio": 75.0, "count_spam": 2, "count_normal": 6, "summary": {"sentiment_ratio": {"POS": 74.29, "NEG": 11.59, "NEU": 14.12}, "comment": "Đa số review tích cực, sản phẩm đáng tin cậy"}},
-    "image": {"score": 77.91, "best_matches": [ {"buyer_path": "<url>", "seller_path": "<url>", "score": 86, "avg_score": 79.0} ]},
-    "total": {"score": 77.91, "comment": "Overall trust score based on combined analyses."}
+  "description": {"label": "Valid description", "score": 0.94},
+  "review": {
+    "trust_score": 72,
+    "summary": {
+      "sentiment_ratio": {"POS": 70, "NEG": 15, "NEU": 15},
+      "comment": "Mostly positive reviews, product seems trustworthy."
+    }
+  },
+  "image": {"score": 81.2},
+  "total": {"score": 78.5, "comment": "Overall trustworthy."}
 }
 ```
 
-* **Note:** Individual API calls for description, image, and review analysis take around **5-10 seconds** each. Running the full combined API may take longer depending on input size.
+> ⚡ Average processing: 5–10s per request depending on input size.
 
-## 🔹 Directory Structure
+---
+
+### 📂 Backend Structure
 
 ```
-trust-analyzer/
-│
-├─ backend/           # API code, model wrappers, utilities
-├─ frontend/          # User interface (UI) and design placeholder
-├─ extension-gppm/    # Browser extension placeholder
-├─ runAPI.py          # API entry point
-├─ requirements.txt   # Python dependencies
-└─ README.md
+backend/
+├── routers/        # FastAPI routes
+├── service/        # Analysis logic (image, text, review)
+├── models/         # Pydantic schemas & AI models
+├── utils/          # Helpers and configuration
+└── main.py         # FastAPI entry
 ```
 
-## 🔹 Frontend
+---
 
-* Placeholder folder for frontend interface development.
-* Supports integration with backend API.
-* UI/UX design to be implemented.
+## 💻 Frontend (Web Application)
 
-### Feature
--  **Product Data Crawling:**  
-  Automatically extracts product information from e-commerce sites (currently supports **Tiki.vn**) using the product link entered by the user.
--  **Seller Reliability Analysis:**  
- Evaluates sellers by analyzing product descriptions, user reviews, and product images to assess trustworthiness and detect potential spam.
-- **Behavior Scoring:**  
-  Generates a seller behavior score using AI/algorithmic analysis to help users quickly assess the reliability of a seller.
-- **Interactive Visualization:**  
-  Displays data and analysis results through intuitive charts and sidebars, including:  
-  - Trust score breakdown  
-  - Spam rate vs normal comments  
-  - Emotion distribution in customer feedback
-- **User-Friendly Interface:**  
-  Built with **React.js** and **TailwindCSS** for a responsive and smooth user experience.
-- **Fast and Efficient:**  
-  Powered by **Vite** for rapid build and optimized performance, ensuring data scraping and analysis are done quickly.
+### 🔹 Description
 
-### Structure
+Modern **React + TailwindCSS + Vite** interface for visualization of trust scores.
+Supports data scraping from **Tiki.vn**, rendering of analysis results, and interactive charts.
+
+### 🧠 Features
+
+* Fetch data via product URL
+* Evaluate description, reviews, and images
+* Display overall trust score with graphs
+* Real-time response from backend API
+
+### 📁 Structure
+
 ```
-frontend/my-project  
-├── nodes_module # Dependencies installed from npm  
-├── public # Scripts injected into e-commerce pages  
-├── src # Core logic for the sidebar UI and API calls  
-├── .env # Environment variables (e.g., API_URL..)
-├── package.json  # Project metadata, dependencies, and scripts
-├── vite.config.js  # Vite configuration (aliases, server, build settings)
+frontend/my-project/
+├── public/
+├── src/
+│   ├── components/
+│   ├── api/
+│   ├── pages/
+│   └── utils/
+├── package.json
+└── vite.config.js
 ```
 
-### How to Use Website
-1. Enter a **product link** into the input field (currently supports products from **Tiki.vn**).  
-2. Click **"Fetch Data"** to scrape product information from the website.  
-3. After the data is loaded, click **"Check Reliability"** to analyze and evaluate the seller’s trust score.
-   - **Overall score** of the product
-   - **Analysis of description, images, and reviews**
-   - **Store information**
-   - **Featured reviews**
+---
 
-## 🔹 Extension
+## 🧩 Browser Extension (GPPM)
 
-The extension will allow users to:
+### 🔹 Purpose
 
-- Analyze product trustworthiness directly on the product page.
-- View AI-generated scores for product description, images, and reviews.
-- Get a summary of the store's credibility.
-- Make more informed purchasing decisions without leaving the e-commerce site.
+Analyze product trust **directly within e-commerce pages** — no copy-pasting links needed.
 
-### Features
+### ⚙️ Setup
 
-- **Sidebar UI**: Displays the trust analysis without redirecting the user.
-- **Real-time AI Scoring**: Pulls data from the backend API and shows scores.
-- **Review Highlights**: Show insights from customer reviews.
-- **Image Analysis**: Evaluate product and customer-submitted images.
-- **Store Info**: Provide key information about the seller or store.
+1. Open `chrome://extensions/`
+2. Enable **Developer Mode**
+3. Click **Load unpacked** → select `extension-gppm/`
+4. Navigate to a Tiki product page → click **Analyze Product**
 
-### Structure
+> 🧠 Requires backend API to be running locally or remotely.
+
+### 📁 Structure
+
 ```
 extension-gppm/
-├── manifest.json # Browser extension manifest
-├── background.js # Background scripts
-├── content.js # Scripts injected into e-commerce pages
-├── sidebar.js # Logic for sidebar UI and API calls
-├── sidebar.html # Sidebar HTML layout
-└── sidebar.css # Sidebar styling
+├── manifest.json
+├── background.js
+├── content.js
+├── sidebar.js
+├── sidebar.html
+└── sidebar.css
 ```
-### How to Use Extension-GPPM
 
-#### 1. Install the Extension (Developer Mode)
+---
 
-1. Open Chrome (or any Chromium-based browser) and go to:  
-   `chrome://extensions/`
-2. Enable **Developer mode** (top-right corner).
-3. Click **Load unpacked**.
-4. Select the `extension-gppm/` folder on your computer.
-5. The extension will be added to your browser.
+## 🧰 Tech Stack
 
-#### 2. Using on E-commerce Pages
+**Languages:** Python 3.10+, JavaScript (ES6+)
+**Frameworks:** FastAPI, React, TailwindCSS, Vite
+**AI Models:** YOLOv8, DeBERTa, ViSoBERT, Qwen2-VL, CLIP
+**Libraries:** OpenCV, Ultralytics, Pydantic, Requests
+**Deployment:** Hugging Face Spaces, Chrome Extension
 
-1. Go to a product page on **Tiki**.
-2. Click the extension icon in the browser toolbar.
-3. A sidebar will appear on the right side of the page.
-4. Click **Analyze Product** to send data to the Trust Analyzer backend.
-5. The results will display:
-   - **Overall score** of the product
-   - **Analysis of description, images, and reviews**
-   - **Store information**
-   - **Featured reviews**
+---
 
-#### 3. Notes
+## 🚀 Future Enhancements
 
-- The extension currently requires the **backend API** to be running, which includes:
-  - `runAPI.py`
-  - `backend/service/crawller.py`
-- If the backend is not running, the sidebar cannot perform product analysis.
-- Currently, the extension only supports **Tiki**; other platforms may be added in the future.
+* ✅ Integration with more e-commerce platforms (Shopee, Lazada)
+* ✅ Deepfake image detection
+* ✅ Multi-language review support
+* ✅ Real-time trust dashboard
 
-## 🔹 Technologies Used
+---
 
-* Python 3.10+
-* YOLOv8 (Ultralytics)
-* Hugging Face Transformers (DeBERTa, ViSoBERT, Qwen2VL, CLIP)
-* FastAPI / Flask (backend API)
-* HTML/CSS/JavaScript (frontend placeholder)
+## 📬 Contact
 
-## 🔹 Future Development
+| Name                   | Email                                                      |
+| ---------------------- | ---------------------------------------------------------- |
+| **Nguyen Dinh Hung**   |[2351050067hung@ou.edu.vn](mailto:2351050067hung@ou.edu.vn) |
+| **Phan Gia Huy**       |[2351050061huy@ou.edu.vn](mailto:2351050061huy@ou.edu.vn)   |
+| **Huynh Van Que Khoa** |[2351050081khoa@ou.edu.vn](mailto:2351050081khoa@ou.edu.vn) |
 
-* Add **review and comment analysis** for products.
-* Combine multiple models to **detect fake images or misleading descriptions**.
-* Develop a **browser plugin** for e-commerce platforms.
-* Enhance **multimodal reasoning** using images and text together for more accurate trust scores.
+---
 
-## 🔹 License
+## 📄 License
 
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
-## 🔹 Contact
-
-If you have any questions or feedback, feel free to reach out to our team members:
-
-- **Hung** – 2351050067 – [hung@ou.edu.vn](mailto:hung@ou.edu.vn)  
-- **Huy** – 2351050061 – [huy@ou.edu.vn](mailto:huy@ou.edu.vn)  
-- **Khoa** – 2351050081 – [khoa@ou.edu.vn](mailto:khoa@ou.edu.vn)  
-
-
-
-
+This project is licensed under the **MIT License**. See the `LICENSE` file for details.
