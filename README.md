@@ -8,9 +8,9 @@
 
 This project includes three integrated components:
 
-1️⃣ **Backend (AI + API Service)** — Core AI logic and FastAPI endpoints.
-2️⃣ **Frontend (Web Application)** — Interactive UI for visualization and user interaction.
-3️⃣ **Browser Extension (GPPM)** — On-page product analysis directly within e-commerce sites.
+1. **Backend (AI + API Service)** — Core AI logic and FastAPI endpoints.  
+2. **Frontend (Web Application)** — Interactive UI for visualization and user interaction.  
+3. **Browser Extension (GPPM)** — On-page product analysis directly within e-commerce sites.
 
 ---
 
@@ -56,7 +56,7 @@ pip install -r requirements.txt
 python runAPI.py
 ```
 
-Access API at **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+Access API at **[http://your-ip:8000]**
 
 **Available Endpoints:**
 
@@ -64,8 +64,8 @@ Access API at **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 | ---------------------------------------------- | ----------------------------------------- |
 | `POST /api/trust-analyzer/analyze/description` | Evaluate product description authenticity |
 | `POST /api/trust-analyzer/analyze/image`       | Compare buyer vs product images           |
-| `POST /api/trust-analyzer/analyze/review`      | Detect fake reviews                       |
-| `POST /api/trust-analyzer/analyze/all`         | Perform full multimodal analysis          |
+| `POST /api/trust-analyzer/analyze/comment`      | Detect fake reviews                       |
+| `POST /api/trust-analyzer/analyze/full`         | Perform full multimodal analysis          |
 
 ---
 ### 🧠 Example Request & Response
@@ -148,7 +148,7 @@ frontend/my-project/
 
 ---
 
-## 🧩 Browser Extension (GPPM)
+## 🧩 Browser Extension
 
 ### 🔹 Purpose
 
@@ -179,22 +179,14 @@ extension-gppm/
 
 ## 🧰 Tech Stack
 
-**Languages:** Python 3.10+, JavaScript (ES6+)
-**Frameworks:** FastAPI, React, TailwindCSS, Vite
-**AI Models:** YOLOv8, DeBERTa, ViSoBERT, Qwen2-VL, CLIP
-**Libraries:** OpenCV, Ultralytics, Pydantic, Requests
+**Languages:** Python 3.10+, JavaScript (ES6+)  
+**Frameworks:** FastAPI, React, TailwindCSS, Vite  
+**AI Models:** YOLOv8, DeBERTa, ViSoBERT, Qwen2-VL, CLIP  
+**Libraries:** OpenCV, Ultralytics, Pydantic, Requests  
 **Deployment:** Hugging Face Spaces, Chrome Extension
 
 ---
 
-## 🚀 Future Enhancements
-
-* ✅ Integration with more e-commerce platforms (Shopee, Lazada)
-* ✅ Deepfake image detection
-* ✅ Multi-language review support
-* ✅ Real-time trust dashboard
-
----
 
 ## 📬 Contact
 
@@ -209,3 +201,4 @@ extension-gppm/
 ## 📄 License
 
 This project is licensed under the **MIT License**. See the `LICENSE` file for details.
+
