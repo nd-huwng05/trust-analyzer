@@ -16,7 +16,6 @@ if (!document.getElementById("tiki-sidebar-wrapper")) {
         background: transparent;
     `;
 
-    // Nút Close luôn hiện
     const closeBtn = document.createElement("button");
     closeBtn.id = "close-btn";
     closeBtn.innerText = "×";
@@ -29,15 +28,14 @@ if (!document.getElementById("tiki-sidebar-wrapper")) {
         background: #fff;
         z-index: 1000001;
     `;
-    // Hover effect
     closeBtn.addEventListener("mouseenter", () => closeBtn.style.color = "#0d17acff");
     closeBtn.addEventListener("mouseleave", () => closeBtn.style.color = "#000000ff");
     closeBtn.addEventListener("click", () => {
-        wrapper.style.transform = "translateX(100%)"; // trượt ra ngoài
+        wrapper.style.transform = "translateX(100%)"; 
         setTimeout(() => wrapper.remove(), 300);
     });
 
-    // Iframe sidebar
+
     const iframe = document.createElement("iframe");
     iframe.id = "tiki-sidebar";
     iframe.src = chrome.runtime.getURL("sidebar.html");
@@ -53,21 +51,17 @@ if (!document.getElementById("tiki-sidebar-wrapper")) {
     wrapper.appendChild(iframe);
     document.body.appendChild(wrapper);
 
-    // Mở wrapper mượt
     setTimeout(() => {
         wrapper.style.transform = "translateX(0)";
         wrapper.style.pointerEvents = "all";
     }, 50);
 
-    // Hàm gửi URL mới vào iframe
     function updateSidebar() {
         iframe.contentWindow.postMessage({ action: "SET_PAGE_URL", url: location.href }, "*");
     }
 
-    // Gửi URL lần đầu
     iframe.onload = updateSidebar;
 
-    // Detect SPA navigation trên Tiki
     const _pushState = history.pushState;
     history.pushState = function(...args) {
         _pushState.apply(this, args);
