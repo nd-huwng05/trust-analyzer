@@ -21,7 +21,6 @@ if (!document.getElementById("tiki-sidebar-wrapper")) {
     closeBtn.id = "close-btn";
     closeBtn.innerText = "×";
     closeBtn.style.cssText = `
-
         width: 100%;
         text-align: right;
         font-size: 23px;
@@ -31,14 +30,8 @@ if (!document.getElementById("tiki-sidebar-wrapper")) {
         z-index: 1000001;
     `;
     // Hover effect
-    closeBtn.addEventListener("mouseenter", () => {
-        closeBtn.style.color = "#0d17acff";
-        
-    });
-    closeBtn.addEventListener("mouseleave", () => {
-        closeBtn.style.color = "#000000ff";
-        
-    });
+    closeBtn.addEventListener("mouseenter", () => closeBtn.style.color = "#0d17acff");
+    closeBtn.addEventListener("mouseleave", () => closeBtn.style.color = "#000000ff");
     closeBtn.addEventListener("click", () => {
         wrapper.style.transform = "translateX(100%)"; // trượt ra ngoài
         setTimeout(() => wrapper.remove(), 300);
@@ -60,14 +53,30 @@ if (!document.getElementById("tiki-sidebar-wrapper")) {
     wrapper.appendChild(iframe);
     document.body.appendChild(wrapper);
 
-    // Gửi URL trang hiện tại vào iframe khi load xong
-    iframe.onload = () => {
-        iframe.contentWindow.postMessage({ action: "SET_PAGE_URL", url: window.location.href }, "*");
+    // Mở wrapper mượt
+    setTimeout(() => {
+        wrapper.style.transform = "translateX(0)";
+        wrapper.style.pointerEvents = "all";
+    }, 50);
 
-        // Mở wrapper mượt
-        setTimeout(() => {
-            wrapper.style.transform = "translateX(0)";
-            wrapper.style.pointerEvents = "all";
-        }, 50);
+    // Hàm gửi URL mới vào iframe
+    function updateSidebar() {
+        iframe.contentWindow.postMessage({ action: "SET_PAGE_URL", url: location.href }, "*");
+    }
+
+    // Gửi URL lần đầu
+    iframe.onload = updateSidebar;
+
+    // Detect SPA navigation trên Tiki
+    const _pushState = history.pushState;
+    history.pushState = function(...args) {
+        _pushState.apply(this, args);
+        updateSidebar();
     };
+    const _replaceState = history.replaceState;
+    history.replaceState = function(...args) {
+        _replaceState.apply(this, args);
+        updateSidebar();
+    };
+    window.addEventListener("popstate", updateSidebar);
 }

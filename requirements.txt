@@ -1,6 +1,6 @@
 click==8.3.0
 fastapi==0.119.1
-numpy==2.3.4
+numpy==2.2.6
 opencv_python==4.12.0.88
 Pillow==12.0.0
 pydantic==2.12.3
@@ -13,3 +13,11 @@ torch==2.7.1
 transformers==4.57.1
 ultralytics==8.3.218
 uvicorn==0.38.0
+Flask==3.0.3
+Flask-Cors==4.0.1
+beautifulsoup4==4.12.3
+selenium==4.25.0
+webdriver-manager==4.0.2
+accelerate>=1.0.0
+hf_xet
+sentencepiece>=0.2.0

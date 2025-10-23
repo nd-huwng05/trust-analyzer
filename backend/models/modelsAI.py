@@ -34,15 +34,15 @@ class LLMModel(AIModel):
             return
         super().__init__()
 
-        self.model_name = "Qwen/Qwen2-VL-2B-Instruct"
+        self.model_name = "mit-han-lab/Qwen2-VL-1.5B-Instruct"
         self.logger.info("Loading LLM model...")
         # self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.processor = AutoProcessor.from_pretrained(self.model_name,  use_fast=True)
-        self.model = Qwen2VLForConditionalGeneration.from_pretrained(self.model_name, device_map="auto")
+        self.model = AutoModelForCausalLM.from_pretrained(self.model_name, device_map="auto")
         get_logger().info("LLM model loaded.")
         self._initialized = True
 
-    def generate_sync(self, prompt_description, images: list[Image] | None = None,max_new_tokens=256):
+    def  generate_sync(self, prompt_description, images: list[Image] | None = None,max_new_tokens=256):
         user_content = []
         if images:
             for img in images:
@@ -62,7 +62,6 @@ class LLMModel(AIModel):
 
         inputs = self.processor(
             text=text_input,
-            images=images if images else None,
             return_tensors="pt"
         ).to(self.model.device)
 
@@ -72,7 +71,7 @@ class LLMModel(AIModel):
 
     async def generate(self, prompt: str, max_new_tokens=256) -> str:
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(None, self.generate_sync, prompt, max_new_tokens)
+        result = await loop.run_in_executor(None, self.generate_sync, prompt, max_new_tokens=max_new_tokens)
         return result
 
 class ProductAnomalyDetectionModel(AIModel):
@@ -98,7 +97,6 @@ class ProductAnomalyDetectionModel(AIModel):
             "quảng cáo không đúng sự thật"
         ]
 
-        # zero-shot pipeline
         self.clf = pipeline("zero-shot-classification", model=self.model_name)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
 
@@ -216,7 +214,6 @@ class FakeReviewModel(AIModel):
                 "summary": {}
             }
 
-        # --- Phân tích từng review song song ---
         tasks = [self._analyze_single(t) for t in texts]
         full_results = await asyncio.gather(*tasks)
         total = len(full_results)
@@ -350,4 +347,3 @@ class SimilarImageModel(AIModel):
             "score": avg_score_total,
             "best_matches": best_matches
         }
-
