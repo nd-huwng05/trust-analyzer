@@ -97,8 +97,31 @@ trust-analyzer/
 
 ## 🔹 Extension
 
-* Placeholder folder for future browser extension development.
-* Will allow trust analysis directly on e-commerce platforms.
+The extension will allow users to:
+
+- Analyze product trustworthiness directly on the product page.
+- View AI-generated scores for product description, images, and reviews.
+- Get a summary of the store's credibility.
+- Make more informed purchasing decisions without leaving the e-commerce site.
+
+# Features
+
+- **Sidebar UI**: Displays the trust analysis without redirecting the user.
+- **Real-time AI Scoring**: Pulls data from the backend API and shows scores.
+- **Review Highlights**: Show insights from customer reviews.
+- **Image Analysis**: Evaluate product and customer-submitted images.
+- **Store Info**: Provide key information about the seller or store.
+
+# Structure
+
+Extension/
+├── manifest.json # Browser extension manifest
+├── background.js # Background scripts
+├── content.js # Scripts injected into e-commerce pages
+├── popup.html # Optional popup UI
+├── sidebar.html # Sidebar UI for analysis
+├── css/ # Stylesheets
+└── images/ # Icons and other assets
 
 ## 🔹 Technologies Used
 
@@ -116,5 +139,6 @@ trust-analyzer/
 * Enhance **multimodal reasoning** using images and text together for more accurate trust scores.
 
 ## 🔹 License
+
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
