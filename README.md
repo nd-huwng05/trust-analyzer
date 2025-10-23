@@ -104,7 +104,7 @@ The extension will allow users to:
 - Get a summary of the store's credibility.
 - Make more informed purchasing decisions without leaving the e-commerce site.
 
-# Features
+### Features
 
 - **Sidebar UI**: Displays the trust analysis without redirecting the user.
 - **Real-time AI Scoring**: Pulls data from the backend API and shows scores.
@@ -112,8 +112,8 @@ The extension will allow users to:
 - **Image Analysis**: Evaluate product and customer-submitted images.
 - **Store Info**: Provide key information about the seller or store.
 
-# Structure
-
+### Structure
+```
 Extension/
 ├── manifest.json # Browser extension manifest
 ├── background.js # Background scripts
@@ -122,7 +122,7 @@ Extension/
 ├── sidebar.html # Sidebar UI for analysis
 ├── css/ # Stylesheets
 └── images/ # Icons and other assets
-
+```
 ## 🔹 Technologies Used
 
 * Python 3.10+
@@ -142,3 +142,4 @@ Extension/
 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
