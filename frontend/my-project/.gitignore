@@ -7,7 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+my-project/node_modules
 dist
 dist-ssr
 *.local
