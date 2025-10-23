@@ -98,7 +98,6 @@ class ProductAnomalyDetectionModel(AIModel):
             "quảng cáo không đúng sự thật"
         ]
 
-        # zero-shot pipeline
         self.clf = pipeline("zero-shot-classification", model=self.model_name)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
 
@@ -216,7 +215,6 @@ class FakeReviewModel(AIModel):
                 "summary": {}
             }
 
-        # --- Phân tích từng review song song ---
         tasks = [self._analyze_single(t) for t in texts]
         full_results = await asyncio.gather(*tasks)
         total = len(full_results)
