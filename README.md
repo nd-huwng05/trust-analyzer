@@ -114,14 +114,13 @@ The extension will allow users to:
 
 ### Structure
 ```
-Extension/
+extension-gppm/
 ├── manifest.json # Browser extension manifest
 ├── background.js # Background scripts
 ├── content.js # Scripts injected into e-commerce pages
-├── popup.html # Optional popup UI
-├── sidebar.html # Sidebar UI for analysis
-├── css/ # Stylesheets
-└── images/ # Icons and other assets
+├── sidebar.js # Logic for sidebar UI and API calls
+├── sidebar.html # Sidebar HTML layout
+└─ side.css # Sidebar styling
 ```
 ## 🔹 Technologies Used
 
@@ -142,4 +141,5 @@ Extension/
 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
