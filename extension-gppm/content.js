@@ -1,140 +1,73 @@
-(function () {
-  try {
-    if (window.__taInjected) return;
-    window.__taInjected = true;
-
-    const container = document.createElement('div');
-    container.id = 'ta-sidebar-container';
-    container.style.position = 'fixed';
-    container.style.top = '0';
-    container.style.right = '0';
-    container.style.height = '100vh';
-    container.style.width = '360px';
-    container.style.zIndex = '2147483647';
-    container.style.pointerEvents = 'auto';
-    container.style.background = '#fff';
-    container.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
-    container.style.borderLeft = '1px solid #ddd';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.fontFamily = 'Arial, sans-serif';
-    container.style.color = '#111';
-
-    const shadow = container.attachShadow({ mode: 'open' });
-
-    shadow.innerHTML = `
-      <style>
-        :host { all: initial; }
-        #ta-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 12px;
-          background: linear-gradient(90deg,#6b59ff,#8f5dfc);
-          color: #fff;
-          font-weight: 700;
-          font-size: 16px;
-        }
-        #ta-close {
-          background: transparent;
-          border: none;
-          color: #fff;
-          font-size: 18px;
-          cursor: pointer;
-        }
-        #ta-body {
-          flex: 1;
-          overflow-y: auto;
-          padding: 12px;
-        }
-        .ta-section {
-          margin-bottom: 12px;
-        }
-        .btn {
-          padding: 6px 12px;
-          border-radius: 6px;
-          border: none;
-          cursor: pointer;
-          background: #5e17eb;
-          color: #fff;
-          font-size: 14px;
-        }
-      </style>
-
-      <div id="ta-header">
-        Trust Analyzer
-        <button id="ta-close">✕</button>
-      </div>
-      <div id="ta-body">
-        <div class="ta-section">
-          <div id="meta-url" style="font-size:12px;color:#666;">Đang lấy URL...</div>
-          <div id="meta-title" style="font-weight:600;margin-top:4px;">Đang tải tiêu đề...</div>
-        </div>
-        <div class="ta-section">
-          <button id="analyze-btn" class="btn">🔒 Phân tích ngay</button>
-        </div>
-        <div id="status" style="margin-top:8px;color:#444;">Sẵn sàng</div>
-        <div id="result-area" style="display:none;margin-top:12px;padding:8px;border-radius:8px;background:#f9f9fb;color:#111;">
-          <div id="score" style="font-weight:700;">Điểm: 0</div>
-          <div id="warning" style="margin-top:4px;font-weight:600;"></div>
-          <div id="details" style="margin-top:4px;color:#555;white-space:pre-wrap;"></div>
-        </div>
-      </div>
+if (!document.getElementById("tiki-sidebar-wrapper")) {
+    const wrapper = document.createElement("div");
+    wrapper.id = "tiki-sidebar-wrapper";
+    wrapper.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 420px;
+        height: 100%;
+        z-index: 999999;
+        pointer-events: none; /* tránh click nhầm trước khi mở */
+        transform: translateX(100%); /* bắt đầu ẩn ngoài màn hình */
+        transition: transform 0.3s ease-in-out; /* hiệu ứng trượt */
+        background: transparent;
     `;
 
-    document.documentElement.appendChild(container);
+    // Nút Close luôn hiện
+    const closeBtn = document.createElement("button");
+    closeBtn.id = "close-btn";
+    closeBtn.innerText = "×";
+    closeBtn.style.cssText = `
 
-    const closeBtn = shadow.getElementById('ta-close');
-    const analyzeBtn = shadow.getElementById('analyze-btn');
-    const statusEl = shadow.getElementById('status');
-    const resultArea = shadow.getElementById('result-area');
-    const scoreEl = shadow.getElementById('score');
-    const warningEl = shadow.getElementById('warning');
-    const detailsEl = shadow.getElementById('details');
-    const metaUrl = shadow.getElementById('meta-url');
-    const metaTitle = shadow.getElementById('meta-title');
-
-    closeBtn.addEventListener('click', () => {
-      container.style.display = 'none';
+        width: 100%;
+        text-align: right;
+        font-size: 23px;
+        border: none;
+        cursor: pointer;
+        background: #fff;
+        z-index: 1000001;
+    `;
+    // Hover effect
+    closeBtn.addEventListener("mouseenter", () => {
+        closeBtn.style.color = "#0d17acff";
+        
+    });
+    closeBtn.addEventListener("mouseleave", () => {
+        closeBtn.style.color = "#000000ff";
+        
+    });
+    closeBtn.addEventListener("click", () => {
+        wrapper.style.transform = "translateX(100%)"; // trượt ra ngoài
+        setTimeout(() => wrapper.remove(), 300);
     });
 
-    function updateTabInfo() {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const tab = tabs && tabs[0];
-        if (!tab) return;
-        metaUrl.textContent = tab.url || 'Không có URL';
-        metaTitle.textContent = tab.title || '';
-      });
-    }
+    // Iframe sidebar
+    const iframe = document.createElement("iframe");
+    iframe.id = "tiki-sidebar";
+    iframe.src = chrome.runtime.getURL("sidebar.html");
+    iframe.style.cssText = `
+        width: 100%;
+        height: 100%;
+        border: none;
+        box-shadow: -3px 0 10px rgba(0,0,0,0.2);
+        pointer-events: all;
+    `;
 
-    analyzeBtn.addEventListener('click', async () => {
-      try {
-        statusEl.textContent = 'Đang phân tích...';
-        resultArea.style.display = 'none';
-        const tabs = await new Promise(resolve => chrome.tabs.query({ active: true, currentWindow: true }, resolve));
-        const tab = tabs && tabs[0];
-        if (!tab || !tab.url) { statusEl.textContent = 'Không lấy được URL'; return; }
-        const res = await fetch('http://localhost:8000/api/trust-analyzer/analyze/full', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: tab.url })
-        });
-        const data = await res.json();
-        const score = Math.round((data.trust_score||0)*100);
-        scoreEl.textContent = 'Điểm: ' + score + '/100';
-        warningEl.textContent = score<50?'Cảnh báo: Lừa đảo!':score<75?'Cẩn thận':'An toàn';
-        detailsEl.textContent = data.details||'';
-        resultArea.style.display = 'block';
-        statusEl.textContent = 'Hoàn tất';
-      } catch(e) {
-        console.error(e);
-        statusEl.textContent = 'Lỗi: '+ (e.message||e);
-      }
-    });
+    wrapper.appendChild(closeBtn);
+    wrapper.appendChild(iframe);
+    document.body.appendChild(wrapper);
 
-    updateTabInfo();
-    console.log('TA: sidebar hiện sẵn, header + nút X');
-  } catch(e) {
-    console.error('TA: content.js error', e);
-  }
-})();
+    // Gửi URL trang hiện tại vào iframe khi load xong
+    iframe.onload = () => {
+        iframe.contentWindow.postMessage({ action: "SET_PAGE_URL", url: window.location.href }, "*");
+
+        // Mở wrapper mượt
+        setTimeout(() => {
+            wrapper.style.transform = "translateX(0)";
+            wrapper.style.pointerEvents = "all";
+        }, 50);
+    };
+}

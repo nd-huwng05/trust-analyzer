@@ -1,187 +1,23 @@
-<!-- Sidebar UI (shadow DOM) -->
-<div id="ta-root" aria-hidden="false">
-  <style>
-    :host { all: initial; }
-    /* container styles */
-    #ta-panel {
-      position: fixed;
-      top: 48px;
-      right: 0;
-      height: calc(100vh - 96px);
-      width: 380px;
-      max-width: 90vw;
-      transform: translateX(100%);
-      transition: transform 280ms cubic-bezier(.2,.9,.3,1);
-      box-shadow: 0 20px 60px rgba(2,6,23,0.35);
-      border-radius: 12px 0 0 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      background: linear-gradient(180deg,#ffffff,#fafafa);
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color: #111;
-      pointer-events: auto;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="sidebar.css">
+<title>Tiki Product Info</title>
+</head>
+<body>
+<div id="sidebar-container">
+    <button id="analyze-btn">Phân tích sản phẩm</button>
 
-    /* when open, translate to visible */
-    :host(.open) #ta-panel { transform: translateX(0); }
-
-    /* slim handle/tab on the edge */
-    #ta-handle {
-      position: fixed;
-      top: 120px;
-      right: 0;
-      width: 44px;
-      height: 88px;
-      border-radius: 8px 0 0 8px;
-      background: linear-gradient(180deg,#6b59ff,#8f5dfc);
-      display:flex; align-items:center; justify-content:center;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 8px 22px rgba(79,42,232,0.18);
-      z-index: 2147483648;
-      transition: right 200ms;
-    }
-
-    /* compact icon inside handle */
-    #ta-handle .icon {
-      font-size: 18px;
-    }
-
-    /* panel header */
-    .ta-header {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px;
-      background: linear-gradient(90deg,#6b59ff,#8f5dfc);
-      color: #fff;
-    }
-    .ta-title { font-weight:700; font-size:16px; }
-    .ta-sub { font-size:12px; opacity:0.95; }
-
-    .ta-body {
-      padding:12px;
-      overflow:auto;
-      flex:1;
-    }
-
-    .site-card {
-      background: #fff;
-      border-radius:10px;
-      padding:10px;
-      box-shadow: 0 6px 18px rgba(2,6,23,0.06);
-      margin-bottom:12px;
-    }
-
-    .meta-url {
-      font-family: monospace;
-      font-size:12px;
-      color:#666;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .meta-title {
-      font-weight:600;
-      font-size:13px;
-      margin-top:6px;
-      color:#111;
-      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-    }
-
-    .actions { display:flex; gap:8px; margin-top:10px; align-items:center; }
-    .btn {
-      border: none;
-      padding:8px 10px;
-      border-radius:10px;
-      cursor:pointer;
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      justify-content:center;
-      font-weight:600;
-    }
-    .btn-primary {
-      background: linear-gradient(90deg,#4f2ae8,#8b63ff);
-      color: white;
-      box-shadow: 0 8px 22px rgba(79,42,232,0.12);
-      flex:1;
-    }
-    .btn-ghost {
-      background: transparent;
-      border:1px solid rgba(0,0,0,0.06);
-      color:#111;
-      width:44px; height:44px; border-radius:8px;
-      display:inline-flex; align-items:center; justify-content:center;
-    }
-
-    .status {
-      margin-top:8px;
-      font-size:13px;
-      color:#444;
-    }
-
-    .result-card {
-      background:#fff; padding:10px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06);
-    }
-
-    .close-x {
-      margin-left:auto;
-      background: transparent;
-      border: none;
-      color: rgba(255,255,255,0.95);
-      font-size:18px;
-      cursor:pointer;
-    }
-
-    /* collapsed small tab when panel open/closed */
-    :host(.open) #ta-handle { right: 380px; } /* move handle with panel width */
-    :host(.closed) #ta-panel { transform: translateX(100%); }
-    :host(.closed) #ta-handle { right: 0; }
-
-    /* small responsive */
-    @media (max-width:420px) {
-      #ta-panel { width: 92vw; border-radius: 8px 0 0 8px; }
-      :host(.open) #ta-handle { right: calc(92vw); }
-    }
-
-    /* accessibility focus */
-    .btn:focus, #ta-handle:focus { outline: 2px solid rgba(99,102,241,0.35); outline-offset: 2px; }
-  </style>
-
-  <div id="ta-handle" role="button" aria-label="Mở Trust Analyzer" tabindex="0">
-    <div class="icon">🔍</div>
-  </div>
-
-  <div id="ta-panel" role="dialog" aria-label="Trust Analyzer panel">
-    <div class="ta-header">
-      <div style="display:flex;flex-direction:column">
-        <div class="ta-title">Trust Analyzer</div>
-        <div class="ta-sub">Phân tích độ tin cậy</div>
-      </div>
-      <button class="close-x" title="Đóng">✕</button>
+    <div id="ai-score-section">
+        <div id="score">0</div>
+        <div id="score-comment"></div>
     </div>
 
-    <div class="ta-body">
-      <div class="site-card">
-        <div id="meta-url" class="meta-url">Đang lấy URL...</div>
-        <div id="meta-title" class="meta-title">Đang tải tiêu đề...</div>
-
-        <div class="actions">
-          <button id="copy-btn" class="btn btn-ghost" title="Sao chép URL">📋</button>
-          <button id="open-btn" class="btn btn-ghost" title="Mở trang">⤴</button>
-          <button id="analyze-btn" class="btn btn-primary" title="Phân tích ngay">🔒 Phân tích ngay</button>
-        </div>
-      </div>
-
-      <div id="status" class="status">Sẵn sàng</div>
-
-      <div id="result-area" class="result-card" style="display:none; margin-top:12px;">
-        <div id="score" style="font-weight:700">Điểm: 0</div>
-        <div id="warning" style="margin-top:8px; font-weight:600"></div>
-        <div id="details" style="margin-top:8px; color:#555"></div>
-      </div>
-    </div>
-  </div>
+    <div id="loading">Đang tải dữ liệu...</div>
+    <div id="product-data" style="display:none;"></div>
 </div>
+<script src="sidebar.js"></script>
+</body>
+</html>
