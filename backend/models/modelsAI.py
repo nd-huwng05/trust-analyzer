@@ -1,5 +1,6 @@
 import asyncio
-from collections import Counter
+import concurrent.futures
+from collections import Counter, defaultdict
 import torch.nn.functional as F
 from sklearn.metrics.pairwise import cosine_similarity
 import cv2
@@ -74,7 +75,7 @@ class LLMModel(AIModel):
         result = await loop.run_in_executor(None, self.generate_sync, prompt, max_new_tokens)
         return result
 
-class FakeNewDetectionModel(AIModel):
+class ProductAnomalyDetectionModel(AIModel):
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -86,61 +87,63 @@ class FakeNewDetectionModel(AIModel):
         if getattr(self, "_initialized", False):
             return
         super().__init__()
-        self.model_name = "jy46604790/Fake-News-Bert-Detect"
-        self.logger.info("Loading fake news detection model...")
-        self.clf = pipeline("text-classification", model=self.model_name, tokenizer=self.model_name)
+
+        self.model_name = "MoritzLaurer/deberta-v3-base-zeroshot-v1"
+        self.logger = get_logger()
+        self.logger.info("Loading product anomaly detection model...")
+
+        self.labels = [
+            "mô tả sản phẩm hợp lệ",
+            "quảng cáo phóng đại",
+            "quảng cáo không đúng sự thật"
+        ]
+
+        # zero-shot pipeline
+        self.clf = pipeline("zero-shot-classification", model=self.model_name)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.explainer = shap.Explainer(self.predict_fn, masker=shap.maskers.Text())
-        get_logger().info("Fake news detection model loaded.")
+
+        self.logger.info("Product anomaly detection model loaded.")
         self._initialized = True
 
-    def predict_fn(self, texts):
-        if isinstance(texts, np.ndarray):
-            texts = texts.tolist()
-        if isinstance(texts, (list, tuple)):
-            texts = [str(t) for t in texts]
-        else:
-            texts = [str(texts)]
-
-        results = self.clf(texts)
-        probs = [r["score"] for r in results]
-        return np.array(probs)
-
-    def _chunk_text(self, text, max_tokens=500):
+    # Cắt văn bản dài thành nhiều đoạn nhỏ
+    def _chunk_text(self, text, max_tokens=400):
         tokens = self.tokenizer.tokenize(text)
         chunks = []
         for i in range(0, len(tokens), max_tokens):
-            chunk_tokens = tokens[i:i+max_tokens]
+            chunk_tokens = tokens[i:i + max_tokens]
             chunk_text = self.tokenizer.convert_tokens_to_string(chunk_tokens)
             chunks.append(chunk_text)
         return chunks
 
+    # Tổng hợp kết quả từ các đoạn
+    def aggregate_results(self, chunk_results):
+        scores_by_label = defaultdict(list)
+        for c in chunk_results:
+            scores_by_label[c["label"]].append(c["score"])
+
+        total_by_label = {label: sum(scores) for label, scores in scores_by_label.items()}
+        label_final = max(total_by_label, key=total_by_label.get)
+        score_final = np.mean(scores_by_label[label_final])
+        return label_final, score_final
+
     def predict(self, text: str):
         chunks = self._chunk_text(text)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(4, len(chunks))) as executor:
+            results = list(executor.map(lambda c: self.clf(c, self.labels), chunks))
+
         chunk_results = []
-        all_evidence = []
-
-        for chunk in chunks:
-            result = self.clf(chunk)[0]
-            label = result['label']
-            score = result['score']
-
-            shap_values = self.explainer([chunk])
-            top_indices = shap_values[0].values.argsort()[::-1][:5]
-            evidence = [shap_values[0].data[i] for i in top_indices]
-            all_evidence.extend(evidence)
-
+        for result in results:
+            label = result["labels"][0]
+            score = result["scores"][0]
             chunk_results.append({
-                "chunk": chunk,
                 "label": label,
-                "score": score,
-                "evidence": evidence
+                "score": score
             })
 
-        avg_score = np.mean([c["score"] for c in chunk_results])
+        label, score = self.aggregate_results(chunk_results)
         return {
-            "score": avg_score,
-            "evidence": all_evidence
+            "label": label,
+            "score": score
         }
 
 class FakeReviewModel(AIModel):

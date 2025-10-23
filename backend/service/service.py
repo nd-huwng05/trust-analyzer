@@ -1,15 +1,14 @@
 from backend.models.modelsInfo import InfoProduct
-from backend.utils.convert import load_images_from_urls
 from backend.utils.json import extract_json
 from backend.utils.prompt import Prompt
-from backend.models.modelsAI import LLMModel, FakeNewDetectionModel, FakeReviewModel, SimilarImageModel
+from backend.models.modelsAI import LLMModel, FakeReviewModel, SimilarImageModel, ProductAnomalyDetectionModel
 
 
 class AnalyzeService:
     def __init__(self):
         super().__init__()
         self.llm_model = LLMModel()
-        self.fake_detection_model = FakeNewDetectionModel()
+        self.fake_detection_model = ProductAnomalyDetectionModel()
         self.fake_review_model = FakeReviewModel()
         self.similarity_model = SimilarImageModel()
 
