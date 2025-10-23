@@ -327,7 +327,7 @@ class SimilarImageModel(AIModel):
                 continue
             buyer_emb = self.get_embedding(buyer_crop)
 
-            sims = cosine_similarity(seller_embs, buyer_emb.reshape(1, -1)).squeeze()
+            sims = cosine_similarity(seller_embs, buyer_emb.reshape(1, -1)).ravel()
             sims = ((sims + 1) / 2 * 100).round().astype(int)
 
             best_idx = int(sims.argmax())

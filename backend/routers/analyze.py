@@ -64,8 +64,8 @@ async def analyze_description(request: Request):
     data = await get_all_scraped_data()
     product_json = InfoProduct(**data)
     result_description = serviceAnalyze.description_analyze(product_json)
-    if "score" in result_description:
-        result_description["score"] = round(float(result_description["score"]), 2)
+     #if "score" in result_description:
+         #result_description["score"] = round(float(result_description["score"]), 2)
     response = {
         "description": result_description,
     }
