@@ -114,8 +114,7 @@ trust-analyzer/
 
 ### Structure
 ```
-frontend/my-project
-├── .vite # Build configuration for Vite  
+frontend/my-project  
 ├── nodes_module # Dependencies installed from npm  
 ├── public # Scripts injected into e-commerce pages  
 ├── src # Core logic for the sidebar UI and API calls  
