@@ -38,14 +38,10 @@ export const DetectPage = () => {
       alert('Vui lòng nhập URL sản phẩm Tiki.');
       return;
     }
-
-    // 1. Bắt đầu tải
     setData(null);
     setIsLoading(true);
-    setMessage("Đang cào dữ liệu... Vui lòng chờ (Có thể mất 5-10 giây)"); // Thông báo loading
-
+    setMessage("Đang cào dữ liệu... Vui lòng chờ (Có thể mất 5-10 giây)");
     try {
-      // Encode URL để đảm bảo các ký tự đặc biệt được xử lý đúng
       const response = await fetch(`http://127.0.0.1:5000/api/tiki-product?url=${encodeURIComponent(url)}`, {
         method: 'GET',
         headers: {
@@ -72,15 +68,7 @@ export const DetectPage = () => {
     }
   };
 
-  // Dữ liệu hiển thị (sử dụng Optional Chaining ?. để tránh lỗi khi data là null)
   const productInfo = data?.data_preview;
-
-  console.log("Current Data:", data);
-  console.log("Current URL:", url);
-
-
-
-
   const [reliabilityDescription, setReliabilityDescription] = useState(null);
   const [reliabilityImage, setReliabilityImage] = useState(null);
   const [reliabilityComment, setReliabilityComment] = useState(null);
@@ -93,13 +81,12 @@ export const DetectPage = () => {
 
   const getReliabilityDescription = async () => {
 
-    // 1. Bắt đầu tải
     if (reliabilityDescription === null) {
       console.log("đang phân tích mô tả")
     }
 
     try {
-      // Encode URL để đảm bảo các ký tự đặc biệt được xử lý đúng
+
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/trust-analyzer/analyze/description`, {
         method: 'POST',
         headers: {
@@ -240,18 +227,16 @@ export const DetectPage = () => {
 
 
 
-  const handleTinhDOTinCay = async () => { // **Cần thêm 'async'**
+  const handleTinhDOTinCay = async () => {
     setFlagAnalyse(true);
     try {
-      await getReliabilityDescription(); // **Thêm 'await'** - chờ hàm này hoàn thành
-      await getReliabilityImage();       // Chờ hàm này hoàn thành
-      await getReliabilityComment();      // Chờ hàm này hoàn thành
-
+      await getReliabilityDescription();
+      await getReliabilityImage();
+      await getReliabilityComment();
       setFlagAnalyse(false);
       setFlagReviewAI(true);
       await getFull();
       setFlagFinal(true)
-      // Sau khi tất cả các hàm trên đã hoàn thành, lệnh này mới được thực thi
 
     } catch (error) {
       console.error("Có lỗi xảy ra khi lấy dữ liệu:", error);
@@ -278,9 +263,8 @@ export const DetectPage = () => {
 
             <h2 className="text-2xl font-semibold mb-4">Nhập thông tin sản phẩm</h2>
 
-            {/* 1. KHỐI NỘI DUNG PHÍA TRÊN */}
             <div className="mb-4">
-              {/* Ô nhập và nút lấy dữ liệu */}
+
               <div className="flex mb-4">
                 <input
                   type="text"
@@ -288,21 +272,19 @@ export const DetectPage = () => {
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="URL / Giá trị cần phân tích"
                   className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={isLoading} // Vô hiệu hóa khi đang tải
+                  disabled={isLoading}
                 />
                 <button
                   className={`px-4 py-2 rounded-r-lg transition-all cursor-pointer
                     ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
                   onClick={getData}
-                  disabled={isLoading} // Vô hiệu hóa khi đang tải
+                  disabled={isLoading}
                 >
                   {isLoading ? 'Đang tải...' : 'Lấy dữ liệu'}
                 </button>
               </div>
 
-              {/* Thông tin sản phẩm */}
               <div className="mb-4 space-y-1">
-                {/* Hiển thị Loading Skeleton khi isLoading là true */}
                 {isLoading ? (
                   <>
                     <div className="h-5 bg-gray-200 rounded w-3/4 animate-pulse"></div>
@@ -335,22 +317,18 @@ export const DetectPage = () => {
               </div>
             </div>
 
-            {/* 2. KHỐI NỘI DUNG PHÍA DƯỚI */}
             <div className="mt-auto pt-4 border-t border-gray-200">
 
-              {/* Trạng thái xử lý */}
               <div className="space-y-2 mb-4">
-                {/* Cập nhật hiển thị trạng thái xử lý */}
                 <p className={`cursor-pointer hover:underline ${isLoading ? 'text-orange-500' : 'text-blue-500'}`}>
                   ⟳ {message}
                 </p>
               </div>
 
-              {/* Nút Tính độ tin cậy */}
               <button
                 className={`w-full py-2 rounded-lg transition-all
                   ${(isLoading || !productInfo) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90'}`}
-                disabled={isLoading || !productInfo} // Vô hiệu hóa khi đang tải hoặc chưa có dữ liệu
+                disabled={isLoading || !productInfo}
                 onClick={() => { handleTinhDOTinCay() }}
               >
                 Tính độ tin cậy
@@ -363,8 +341,6 @@ export const DetectPage = () => {
         <div className="bg-white text-slate-800 p-6 rounded-2xl shadow-lg " data-aos="fade-left">
 
           <h2 className="text-2xl font-semibold mb-4">Kết quả dự đoán</h2>
-          {/* Hiển thị tỷ lệ */}
-          {/* Hiển thị tỷ lệ */}
           {flagStartAnalyse ? (
             <ul className="my-4 space-y-1 ">
               <li>
