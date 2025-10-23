@@ -94,23 +94,28 @@ class Prompt:
         return prompt
 
     @staticmethod
-    def generate_full_prompt(image:Evaluate, comment:Evaluate, text:Evaluate) -> str:
+    def generate_full_prompt(image, comment, description) -> str:
+        weights = {"image": 1 / 3, "description": 1 / 3, "comment": 1 / 3}
+
         prompt = f"""
         Bạn là chuyên gia kiểm định chất lượng sản phẩm TMĐT.  
-        Kết quả phân tích chi tiết:
+        Bạn nhận được dữ liệu JSON tổng hợp kết quả phân tích từ 3 mô hình:
 
-        - Hình ảnh (người bán vs người mua): {image.score}/100, {image.comment}  
-        - Mô tả sản phẩm: {text.score}/100, {text.comment}  
-        - Phân tích bình luận: {comment.score}/100, {comment.comment}  
+        Kết quả phân tích Image: {image}
+        Kết quả phân tích Description: {description}
+        Kết quả phân tích Comment: {comment}
 
-        Dựa trên các thông tin trên, đưa **đánh giá tổng thể** về độ tin cậy của sản phẩm.  
+        Nhiệm vụ của bạn:
 
-        Trả về **JSON duy nhất**:
-
+        1. Dựa trên các thông tin trong JSON trên, tính **điểm tổng thể 0–100** theo trọng số {weights}.
+        2. Viết **comment chấp nhận được, không nên đưa quá nhiều con số, viết trong 2 dòng** giải thích lý do tại sao sản phẩm đạt điểm này, dựa trên các kết quả đã có.
+        3. Trả về **JSON duy nhất**: không được sai định dạng hay kí tự có trong json
         {{
-            "score": int,    # 0–100
-            "comment": str   # lý do tại sao sản phẩm đạt điểm này
+            "score": int,      # Điểm tổng thể 0–100
+            "comment": str     # Lý do 
         }}
+        Chỉ trả JSON, không thêm bất kỳ text nào khác.
         """
+
         return prompt
 

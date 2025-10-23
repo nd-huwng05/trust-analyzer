@@ -41,9 +41,9 @@ async def analyze_description(request: Request):
 async def analyze_comment(request: Request):
     data = await request.json()
     product_json = InfoProduct(**data)
-    result_comment = serviceAnalyze.comment_analyze(product_json)
+    response = await serviceAnalyze.comment_analyze(product_json)
     response = {
-        "review": result_comment,
+        "review": response,
     }
     return JSONResponse(response)
 
@@ -65,8 +65,8 @@ async def analyze_full(request: Request):
     result_image = data.get("image", {})
     result_comment = data.get("review", {})
 
-    result_full = serviceAnalyze.full_analyze(Evaluate(**result_image), Evaluate(**result_comment),
-                                              Evaluate(**result_description))
+    result_full = serviceAnalyze.full_analyze(result_image, result_comment,
+                                              result_description)
     response = {
         "description": result_description,
         "review": result_comment,
