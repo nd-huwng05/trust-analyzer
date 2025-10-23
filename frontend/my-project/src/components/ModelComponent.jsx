@@ -3,7 +3,6 @@ import Chart from 'chart.js/auto'
 
 const ModelComponent = ({ onClose, description, image, comment }) => {
 
-
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
@@ -45,7 +44,6 @@ const ModelComponent = ({ onClose, description, image, comment }) => {
       },
     });
 
-    // Cleanup khi unmount hoặc khi dependency thay đổi
     return () => {
       chartInstanceRef.current?.destroy();
       chartInstanceRef.current = null;
