@@ -105,7 +105,6 @@ class ProductAnomalyDetectionModel(AIModel):
         self.logger.info("Product anomaly detection model loaded.")
         self._initialized = True
 
-    # Cắt văn bản dài thành nhiều đoạn nhỏ
     def _chunk_text(self, text, max_tokens=400):
         tokens = self.tokenizer.tokenize(text)
         chunks = []
@@ -115,7 +114,6 @@ class ProductAnomalyDetectionModel(AIModel):
             chunks.append(chunk_text)
         return chunks
 
-    # Tổng hợp kết quả từ các đoạn
     def aggregate_results(self, chunk_results):
         scores_by_label = defaultdict(list)
         for c in chunk_results:
@@ -211,7 +209,7 @@ class FakeReviewModel(AIModel):
         texts = [t.strip() for t in texts if t.strip()]
         if not texts:
             return {
-                "trust_score": 0,
+                "score": 0,
                 "non_spam_ratio": 0,
                 "count_spam": 0,
                 "count_normal": 0,
@@ -247,7 +245,7 @@ class FakeReviewModel(AIModel):
             comment = "Review hỗn hợp, cần xem xét chi tiết"
 
         return {
-            "trust_score": trust_score,
+            "score": trust_score,
             "non_spam_ratio": non_spam_ratio,
             "count_spam": spam_count,
             "count_normal": normal_count,
