@@ -120,7 +120,7 @@ extension-gppm/
 ├── content.js # Scripts injected into e-commerce pages
 ├── sidebar.js # Logic for sidebar UI and API calls
 ├── sidebar.html # Sidebar HTML layout
-└─ side.css # Sidebar styling
+└── sidebar.css # Sidebar styling
 ```
 ## 🔹 Technologies Used
 
@@ -141,5 +141,6 @@ extension-gppm/
 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
 
