@@ -60,6 +60,7 @@ async def analyze(request: Request):
 
 @routerAnalyze.post("/analyze/description")
 async def analyze_description(request: Request):
+    my_dict = {}
     #data = await request.json()
     data = await get_all_scraped_data()
     product_json = InfoProduct(**data)
