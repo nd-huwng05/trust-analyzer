@@ -6,9 +6,9 @@ const ModelComponent = ({ onClose, description, image, comment }) => {
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
-  const POS = comment?.comment?.summary?.sentiment_ratio?.POS ?? 66.35;
-  const NEG = comment?.comment?.summary?.sentiment_ratio?.NEG ?? 31.8;
-  const NEU = comment?.comment?.summary?.sentiment_ratio?.NEU ?? 1.86;
+  const POS = comment?.review.summary.sentiment_ratio.POS;
+  const NEG = comment?.review.summary.sentiment_ratio.NEG;
+  const NEU = comment?.review.summary.sentiment_ratio.NEU
 
   useEffect(() => {
     const canvas = chartRef.current;
@@ -62,7 +62,7 @@ const ModelComponent = ({ onClose, description, image, comment }) => {
           <div className="bg-blue-50 p-4 rounded-xl shadow-sm">
             <p className="font-semibold text-gray-600">Mô tả</p>
             <p className="text-2xl font-bold text-blue-600">
-              {((description?.description?.score ?? 0).toFixed(2))}%
+              {((description?.description?.score  ?? 0).toFixed(2))*100}%
             </p>
           </div>
           <div className="bg-green-50 p-4 rounded-xl shadow-sm">
@@ -83,13 +83,21 @@ const ModelComponent = ({ onClose, description, image, comment }) => {
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-2">📸 Ảnh khớp tốt nhất</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {image?.image?.best_matches?.map((url, index) => (
+            {image?.image?.best_matches?.sort((a, b) => b.score - a.score)?.slice(0, 3).map((item, index) => (
+             <div>
+                  <img
+                key={index}
+                src={item.buyer_path}
+                alt={`match-${index}`}
+                className="w-full m-[2px] h-40 object-cover rounded-xl shadow-md border"
+              />
               <img
                 key={index}
-                src={url}
+                src={item.seller_path}
                 alt={`match-${index}`}
-                className="w-full h-40 object-cover rounded-xl shadow-md border"
+                className="w-full m-[2px] h-40  object-cover rounded-xl shadow-md border"
               />
+             </div>
             ))}
           </div>
         </div>
@@ -131,9 +139,9 @@ const ModelComponent = ({ onClose, description, image, comment }) => {
               <p className="font-medium text-gray-700 mb-2">📊 Tỷ lệ cảm xúc:</p>
               <canvas ref={chartRef} className="!w-[300px] !h-[300px]" />
               <ul className="mt-3 text-sm space-y-1">
-                <li>😊 <span className="text-green-600 font-semibold">Tích cực:</span> {comment?.review?.summary.sentiment_ratio.POS}%</li>
-                <li>☹️ <span className="text-red-500 font-semibold">Tiêu cực:</span> {comment?.review?.summary.sentiment_ratio.NEG}%</li>
-                <li>😐 <span className="text-gray-600 font-semibold">Trung lập:</span> {comment?.review?.summary.sentiment_ratio.NEU}%</li>
+                <li>😊 <span className="text-green-600 text-xl font-semibold">Tích cực</span> {POS}%</li>
+                <li>☹️ <span className="text-red-500 text-xl font-semibold">Tiêu cực</span> {NEG}%</li>
+                <li>😐 <span className="text-gray-600 text-xl font-semibold">Trung lập</span> {NEU}%</li>
               </ul>
             </div>
           </div>

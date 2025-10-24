@@ -27,7 +27,7 @@ export const DetectPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 2. Hàm mở Modal
-   const handleOpenModal = () => setIsModalOpen(true);
+  const handleOpenModal = () => setIsModalOpen(true);
 
   // Hàm đóng Modal
   const handleCloseModal = () => setIsModalOpen(false);
@@ -38,7 +38,6 @@ export const DetectPage = () => {
       alert('Vui lòng nhập URL sản phẩm Tiki.');
       return;
     }
-    setData(null);
     setIsLoading(true);
     setMessage("Đang cào dữ liệu... Vui lòng chờ (Có thể mất 5-10 giây)");
     try {
@@ -206,26 +205,24 @@ export const DetectPage = () => {
 
     if (reliabilityDescription) {
       rateTemp.push(Number((parseFloat(reliabilityDescription.description?.score) * 100).toFixed(2)));
-    }else{
+    } else {
       rateTemp.push(0)
     }
 
     if (reliabilityImage) {
       rateTemp.push(Number(parseFloat(reliabilityImage.image?.score).toFixed(2)));
-    }else{
-        rateTemp.push(0)
+    } else {
+      rateTemp.push(0)
     }
 
     if (reliabilityComment) {
       rateTemp.push(Number(parseFloat(reliabilityComment.review?.score).toFixed(2)));
-    }else{
-        rateTemp.push(0)
+    } else {
+      rateTemp.push(0)
     }
 
     setRate(rateTemp);
   };
-
-
 
   const handleTinhDOTinCay = async () => {
     setFlagAnalyse(true);
@@ -249,6 +246,18 @@ export const DetectPage = () => {
     }
   }, [reliabilityDescription, reliabilityImage, reliabilityComment]);
 
+  const removeData = () => {
+    setData(null);
+    setUrl('')
+    setReliabilityComment(null);
+    setReliabilityDescription(null);
+    setRate([]);
+    setReliabilityImage(null);
+    setFull(null);
+    setFlagAnalyse(false);
+    setFlagFinal(false);
+    setFlagReviewAI(false)
+  }
 
   return (
     <div className="min-h-screen pt-16 flex items-center justify-center px-6 bg-slate-900 text-white">
@@ -270,15 +279,15 @@ export const DetectPage = () => {
                   type="text"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  placeholder="URL / Giá trị cần phân tích"
+                  placeholder="URL / Giá trị cần phân tích "
                   className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={isLoading}
                 />
                 <button
                   className={`px-4 py-2 rounded-r-lg transition-all cursor-pointer
-                    ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
+                    ${(isLoading || flagStartAnalyse)? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
                   onClick={getData}
-                  disabled={isLoading}
+                  disabled={isLoading || flagStartAnalyse}
                 >
                   {isLoading ? 'Đang tải...' : 'Lấy dữ liệu'}
                 </button>
@@ -317,18 +326,24 @@ export const DetectPage = () => {
               </div>
             </div>
 
-            <div className="mt-auto pt-4 border-t border-gray-200">
-
-              <div className="space-y-2 mb-4">
+            <div className="mt-auto pt-4 relative ">
+              {flagFinal && (
+                <button
+                  onClick={() => removeData()}
+                  className="py-2 px-2 rounded-lg transition-all absolute right-0 bottom-[100%] bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 cursor-pointer"
+                >
+                  Xóa dữ liệu
+                </button>
+              )}
+              <div className="space-y-2 mb-4 border-t border-gray-200">
                 <p className={`cursor-pointer hover:underline ${isLoading ? 'text-orange-500' : 'text-blue-500'}`}>
                   ⟳ {message}
                 </p>
               </div>
-
               <button
                 className={`w-full py-2 rounded-lg transition-all
-                  ${(isLoading || !productInfo) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90'}`}
-                disabled={isLoading || !productInfo}
+                  ${(isLoading || !productInfo || flagStartAnalyse) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90'}`}
+                disabled={isLoading || !productInfo || flagStartAnalyse}
                 onClick={() => { handleTinhDOTinCay() }}
               >
                 Tính độ tin cậy
@@ -361,7 +376,7 @@ export const DetectPage = () => {
                   {reliabilityComment ? "Đã xong ✅" : "Đang phân tích ⏳"}
                 </span>
               </li>
-              
+
             </ul>
           ) : (
             <ul className="my-4 space-y-1  relative">
@@ -384,12 +399,12 @@ export const DetectPage = () => {
                 </span>
               </li>
 
-            
-              {flagFinal  && (
-                  <div className="absolute right-2 bottom-1 text-blue-500 cursor-pointer" onClick={handleOpenModal}>
-                Xem chi tiết
-              </div>
-                )}
+
+              {flagFinal && (
+                <div className="absolute right-2 bottom-1 text-blue-500 cursor-pointer" onClick={handleOpenModal}>
+                  Xem chi tiết
+                </div>
+              )}
 
             </ul>
           )}
